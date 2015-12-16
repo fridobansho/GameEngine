@@ -2,6 +2,7 @@
 #include <string>
 
 #include "MainGame.h"
+#include "Sprite.h"
 
 void FatalError(std::string errorString)
 {
@@ -21,6 +22,8 @@ MainGame::~MainGame()
 void MainGame::Run()
 {
 	InitSystems();
+
+	_sprite.Init(-1.0f, -1.0f, 1.0f, 1.0f);
 
 	GameLoop();
 }
@@ -88,15 +91,7 @@ void MainGame::DrawGame()
 	glClearDepth(1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glEnableClientState(GL_COLOR_ARRAY);
-	glBegin(GL_TRIANGLES);
-
-	glColor3f(1.0f, 0.0f, 0.0f);
-	glVertex2f(-1.0f, -1.0f);
-	glVertex2f(0.0f, -1.0f);
-	glVertex2f(0.0f, 0.0f);
-
-	glEnd();
+	_sprite.Draw();
 
 	SDL_GL_SwapWindow(_window);
 }
