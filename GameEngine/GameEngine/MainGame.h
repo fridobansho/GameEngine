@@ -20,6 +20,7 @@ public:
 private:
 	void InitSystems();
 	void ProcessInput();
+	void DrawGame();
 	void GameLoop();
 
 	SDL_Window* _window;
