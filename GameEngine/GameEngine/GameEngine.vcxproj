@@ -159,6 +159,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Shaders\colourShading.frag" />
+    <None Include="Shaders\colourShading.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainGame.h" />
