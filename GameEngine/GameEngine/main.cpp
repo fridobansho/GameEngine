@@ -1,6 +1,6 @@
-#include <cstdio>
-#include <SDL.h>
-#include <GL/glew.h>
+#include <iostream>
+
+#include "MainGame.h"
 
 #if _MSC_VER >= 1400
 FILE _iob[] = { *stdin, *stdout, *stderr };
@@ -18,7 +18,9 @@ void stub()
 
 int main(int argc, char** argv)
 {
-	SDL_Init(SDL_INIT_EVERYTHING);
+	MainGame mainGame;
+
+	mainGame.Run();
 
 	return 0;
 }
