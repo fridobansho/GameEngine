@@ -3,13 +3,8 @@
 
 #include "MainGame.h"
 #include "Sprite.h"
+#include "Errors.h"
 
-void FatalError(std::string errorString)
-{
-	std::cout << errorString << std::endl;
-	system("pause");
-	SDL_Quit();
-}
 
 MainGame::MainGame() : _window(nullptr), _screenWidth(1024), _screenHeight(768), _gameState(GameState::PLAY)
 {
@@ -57,6 +52,15 @@ void MainGame::InitSystems()
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+	InitShaders();
+}
+
+void MainGame::InitShaders()
+{
+	_colourProgram.CompileShaders("Shaders\\colourShading.vert", "Shaders\\colourShading.frag");
+	_colourProgram.AddAttribute("vertexPosition");
+	_colourProgram.LinkShaders();
 }
 
 void MainGame::GameLoop()
@@ -91,7 +95,11 @@ void MainGame::DrawGame()
 	glClearDepth(1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	_colourProgram.Use();
+
 	_sprite.Draw();
+
+	_colourProgram.UnUse();
 
 	SDL_GL_SwapWindow(_window);
 }

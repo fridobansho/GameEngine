@@ -153,6 +153,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Errors.cpp" />
+    <ClCompile Include="GLSLProgram.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainGame.cpp" />
     <ClCompile Include="Sprite.cpp" />
@@ -163,6 +165,8 @@
     <None Include="Shaders\colourShading.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Errors.h" />
+    <ClInclude Include="GLSLProgram.h" />
     <ClInclude Include="MainGame.h" />
     <ClInclude Include="Sprite.h" />
   </ItemGroup>
