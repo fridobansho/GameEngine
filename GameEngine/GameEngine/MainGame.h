@@ -33,5 +33,6 @@ private:
 	GameState _gameState;
 	Sprite _sprite;
 	GLSLProgram _colourProgram;
+	float _time;
 };
 

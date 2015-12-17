@@ -6,7 +6,12 @@
 #include "Errors.h"
 
 
-MainGame::MainGame() : _window(nullptr), _screenWidth(1024), _screenHeight(768), _gameState(GameState::PLAY)
+MainGame::MainGame() :
+	_window(nullptr),
+	_screenWidth(1024),
+	_screenHeight(768),
+	_gameState(GameState::PLAY),
+	_time(0.0f)
 {
 }
 
@@ -69,6 +74,7 @@ void MainGame::GameLoop()
 	while (_gameState != GameState::EXIT)
 	{
 		ProcessInput();
+		_time += 0.01;
 		DrawGame();
 	}
 }
@@ -97,6 +103,10 @@ void MainGame::DrawGame()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	_colourProgram.Use();
+
+	GLuint timeLocation = _colourProgram.GetUniformLocation("time");
+
+	glUniform1f(timeLocation, _time);
 
 	_sprite.Draw();
 

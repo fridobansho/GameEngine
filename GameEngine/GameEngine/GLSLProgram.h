@@ -12,6 +12,7 @@ public:
 	void CompileShaders(const std::string&, const std::string&);
 	void LinkShaders();
 	void AddAttribute(const std::string&);
+	GLint GetUniformLocation(const std::string&);
 	void Use();
 	void UnUse();
 
