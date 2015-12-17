@@ -18,7 +18,7 @@ void MainGame::Run()
 {
 	InitSystems();
 
-	_sprite.Init(-1.0f, -1.0f, 1.0f, 1.0f);
+	_sprite.Init(-1.0f, -1.0f, 2.0f, 2.0f);
 
 	GameLoop();
 }
@@ -60,6 +60,7 @@ void MainGame::InitShaders()
 {
 	_colourProgram.CompileShaders("Shaders\\colourShading.vert", "Shaders\\colourShading.frag");
 	_colourProgram.AddAttribute("vertexPosition");
+	_colourProgram.AddAttribute("vertexColour");
 	_colourProgram.LinkShaders();
 }
 
