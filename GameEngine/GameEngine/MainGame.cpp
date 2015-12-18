@@ -74,7 +74,7 @@ void MainGame::GameLoop()
 	while (_gameState != GameState::EXIT)
 	{
 		ProcessInput();
-		_time += 0.01;
+		_time += 0.01f;
 		DrawGame();
 	}
 }

@@ -2,7 +2,7 @@
 
 #include <fstream>
 
-bool IOManager::ReadFileToBuffer(const std::string &filePath, std::vector<char>& buffer)
+bool IOManager::ReadFileToBuffer(const std::string &filePath, std::vector<unsigned char>& buffer)
 {
 	std::ifstream file(filePath, std::ios::binary);
 	if (file.fail())
@@ -21,7 +21,7 @@ bool IOManager::ReadFileToBuffer(const std::string &filePath, std::vector<char>&
 
 	buffer.resize(fileSize);
 
-	file.read(&(buffer[0]), fileSize);
+	file.read((char*)&(buffer[0]), fileSize);
 
 	file.close();
 
