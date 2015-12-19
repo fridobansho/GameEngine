@@ -11,7 +11,8 @@ MainGame::MainGame() :
 	_screenWidth(1024),
 	_screenHeight(768),
 	_gameState(GameState::PLAY),
-	_time(0.0f)
+	_time(0.0f),
+	_maxFPS(60.0f)
 {
 }
 
@@ -37,6 +38,7 @@ void MainGame::InitSystems()
 	//Initialise SDL
 	SDL_Init(SDL_INIT_EVERYTHING);
 
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	_window = SDL_CreateWindow("Game Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _screenWidth, _screenHeight, SDL_WINDOW_OPENGL);
 
 	if (_window == nullptr)
@@ -58,9 +60,11 @@ void MainGame::InitSystems()
 		FatalError("Could not initialise glew.");
 	}
 
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	printf("*** OpenGL Version: %s ***\n", glGetString(GL_VERSION));
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+	SDL_GL_SetSwapInterval(0);
 
 	InitShaders();
 }
@@ -78,10 +82,74 @@ void MainGame::GameLoop()
 {
 	while (_gameState != GameState::EXIT)
 	{
+		float startTicks = SDL_GetTicks();
 		ProcessInput();
 		_time += 0.01f;
 		DrawGame();
+		CalculateFPS();
+
+		static int frameCounter = 0;
+		frameCounter++;
+
+		if (frameCounter == 10)
+		{
+			frameCounter = 0;
+			std::cout << _fps << std::endl;
+		}
+
+		float frameTicks = SDL_GetTicks() - startTicks;
+
+		if ((1000.0f / _maxFPS) > frameTicks)
+		{
+			SDL_Delay((1000.0f / _maxFPS) - frameTicks);
+		}
 	}
+}
+
+void MainGame::CalculateFPS()
+{
+	static const int NUM_SAMPLES = 10;
+	static float frameTimes[NUM_SAMPLES];
+	static int currentFrame = 0;
+
+	static float prevTicks = SDL_GetTicks();
+	float currentTicks = SDL_GetTicks();
+
+	_frameTime = currentTicks - prevTicks;
+	frameTimes[currentFrame % NUM_SAMPLES] = _frameTime;
+
+	prevTicks = currentTicks;
+
+	int count;
+
+	currentFrame++;
+
+	if (currentFrame < NUM_SAMPLES)
+	{
+		count = currentFrame;
+	}
+	else
+	{
+		count = NUM_SAMPLES;
+	}
+
+	float frameTimeAverage = 0.0f;
+
+	for (int i = 0; i < count; i++)
+	{
+		frameTimeAverage += frameTimes[i];
+	}
+	frameTimeAverage /= count;
+
+	if (frameTimeAverage > 0)
+	{
+		_fps = 1000.0f / frameTimeAverage;
+	}
+	else
+	{
+		_fps = 60.0f;
+	}
+
 }
 
 void MainGame::ProcessInput()
