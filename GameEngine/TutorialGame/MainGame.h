@@ -4,9 +4,9 @@
 #include <GL/glew.h>
 #include <vector>
 
-#include <GLSLProgram.h>
-#include <Sprite.h>
-#include <GLTexture.h>
+#include <GameEngine/GLSLProgram.h>
+#include <GameEngine/Sprite.h>
+#include <GameEngine/GLTexture.h>
 
 enum class GameState
 {

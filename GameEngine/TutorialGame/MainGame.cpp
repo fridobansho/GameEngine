@@ -2,8 +2,8 @@
 #include <string>
 
 #include "MainGame.h"
-#include "Sprite.h"
-#include "Errors.h"
+#include <GameEngine/Sprite.h>
+#include <GameEngine/Errors.h>
 
 
 MainGame::MainGame() :
