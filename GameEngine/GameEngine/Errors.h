@@ -2,4 +2,6 @@
 
 #include <string>
 
-void FatalError(std::string);
+namespace GameEngine {
+	void FatalError(std::string);
+}

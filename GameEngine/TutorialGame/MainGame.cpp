@@ -4,10 +4,10 @@
 #include "MainGame.h"
 #include <GameEngine/Sprite.h>
 #include <GameEngine/Errors.h>
+#include <GameEngine/GameEngine.h>
 
 
 MainGame::MainGame() :
-	_window(nullptr),
 	_screenWidth(1024),
 	_screenHeight(768),
 	_gameState(GameState::PLAY),
@@ -24,10 +24,10 @@ void MainGame::Run()
 {
 	InitSystems();
 
-	_sprites.push_back(new  Sprite());
+	_sprites.push_back(new  GameEngine::Sprite());
 	_sprites.back()->Init(-1.0f, -1.0f, 1.0f, 1.0f, "Textures/jimmyJump_pack/PNG/CharacterRight_Standing.png");
 
-	_sprites.push_back(new Sprite());
+	_sprites.push_back(new GameEngine::Sprite());
 	_sprites.back()->Init(0.0f, -1.0f, 1.0f, 1.0f, "Textures/jimmyJump_pack/PNG/CharacterRight_Standing.png");
 
 	GameLoop();
@@ -35,36 +35,9 @@ void MainGame::Run()
 
 void MainGame::InitSystems()
 {
-	//Initialise SDL
-	SDL_Init(SDL_INIT_EVERYTHING);
+	GameEngine::Init();
 
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	_window = SDL_CreateWindow("Game Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _screenWidth, _screenHeight, SDL_WINDOW_OPENGL);
-
-	if (_window == nullptr)
-	{
-		FatalError("SDL Window could not be created.");
-	}
-
-	SDL_GLContext glContext = SDL_GL_CreateContext(_window);
-
-	if (glContext == nullptr)
-	{
-		FatalError("SDL GL Context could not be created.");
-	}
-
-	GLenum error = glewInit();
-
-	if (error != GLEW_OK)
-	{
-		FatalError("Could not initialise glew.");
-	}
-
-	printf("*** OpenGL Version: %s ***\n", glGetString(GL_VERSION));
-
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-	SDL_GL_SetSwapInterval(0);
+	_window.Create("Game Engine", _screenWidth, _screenHeight, 0);
 
 	InitShaders();
 }
@@ -194,5 +167,5 @@ void MainGame::DrawGame()
 
 	_colourProgram.UnUse();
 
-	SDL_GL_SwapWindow(_window);
+	_window.Swap();
 }

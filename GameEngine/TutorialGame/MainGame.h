@@ -7,6 +7,7 @@
 #include <GameEngine/GLSLProgram.h>
 #include <GameEngine/Sprite.h>
 #include <GameEngine/GLTexture.h>
+#include <GameEngine/Window.h>
 
 enum class GameState
 {
@@ -31,12 +32,12 @@ private:
 
 	void CalculateFPS();
 
-	SDL_Window* _window;
+	GameEngine::Window _window;
 	int _screenWidth;
 	int _screenHeight;
 	GameState _gameState;
-	std::vector<Sprite*> _sprites;
-	GLSLProgram _colourProgram;
+	std::vector<GameEngine::Sprite*> _sprites;
+	GameEngine::GLSLProgram _colourProgram;
 	float _time;
 	float _fps;
 	float _maxFPS;

@@ -2,12 +2,14 @@
 #include <string>
 #include "TextureCache.h"
 
-class ResourceManager
-{
-public:
-	static GLTexture GetTexture(const std::string&);
+namespace GameEngine {
+	class ResourceManager
+	{
+	public:
+		static GLTexture GetTexture(const std::string&);
 
-private:
-	static TextureCache _textureCache;
-};
+	private:
+		static TextureCache _textureCache;
+	};
 
+}

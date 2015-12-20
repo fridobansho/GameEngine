@@ -5,10 +5,12 @@
 
 #include "Errors.h"
 
-void FatalError(std::string errorString)
-{
-	std::cout << errorString << std::endl;
-	system("pause");
-	SDL_Quit();
-	exit(-1);
+namespace GameEngine {
+	void FatalError(std::string errorString)
+	{
+		std::cout << errorString << std::endl;
+		system("pause");
+		SDL_Quit();
+		exit(-1);
+	}
 }

@@ -4,22 +4,24 @@
 #include <string>
 #include "GLTexture.h"
 
-class Sprite
-{
-public:
-	Sprite();
-	~Sprite();
+namespace GameEngine {
+	class Sprite
+	{
+	public:
+		Sprite();
+		~Sprite();
 
-	void Init(float x, float y, float width, float height, const std::string&);
-	void Draw();
+		void Init(float x, float y, float width, float height, const std::string&);
+		void Draw();
 
-private:
-	float _x;
-	float _y;
-	float _width;
-	float _height;
+	private:
+		float _x;
+		float _y;
+		float _width;
+		float _height;
 
-	GLuint _vboID;
-	GLTexture _texture;
-};
+		GLuint _vboID;
+		GLTexture _texture;
+	};
 
+}

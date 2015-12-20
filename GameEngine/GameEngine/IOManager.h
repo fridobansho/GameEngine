@@ -1,9 +1,10 @@
 #pragma once
 #include <vector>
 
-class IOManager
-{
-public:
-	static bool ReadFileToBuffer(const std::string&, std::vector<unsigned char>&);
-};
-
+namespace GameEngine {
+	class IOManager
+	{
+	public:
+		static bool ReadFileToBuffer(const std::string&, std::vector<unsigned char>&);
+	};
+}
