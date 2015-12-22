@@ -6,6 +6,8 @@
 #include <GameEngine/Errors.h>
 #include <GameEngine/GameEngine.h>
 
+#include <GameEngine/Camera2D.h>
+
 
 MainGame::MainGame() :
 	_screenWidth(1024),
@@ -14,6 +16,7 @@ MainGame::MainGame() :
 	_time(0.0f),
 	_maxFPS(60.0f)
 {
+	_camera.Init(_screenWidth, _screenHeight);
 }
 
 MainGame::~MainGame()
@@ -25,10 +28,10 @@ void MainGame::Run()
 	InitSystems();
 
 	_sprites.push_back(new  GameEngine::Sprite());
-	_sprites.back()->Init(-1.0f, -1.0f, 1.0f, 1.0f, "Textures/jimmyJump_pack/PNG/CharacterRight_Standing.png");
+	_sprites.back()->Init(0.0f, 0.0f, _screenWidth / 2, _screenWidth / 2, "Textures/jimmyJump_pack/PNG/CharacterRight_Standing.png");
 
 	_sprites.push_back(new GameEngine::Sprite());
-	_sprites.back()->Init(0.0f, -1.0f, 1.0f, 1.0f, "Textures/jimmyJump_pack/PNG/CharacterRight_Standing.png");
+	_sprites.back()->Init(_screenWidth / 2, 0.0f, _screenWidth / 2, _screenWidth / 2, "Textures/jimmyJump_pack/PNG/CharacterRight_Standing.png");
 
 	GameLoop();
 }
@@ -58,6 +61,8 @@ void MainGame::GameLoop()
 		float startTicks = SDL_GetTicks();
 		ProcessInput();
 		_time += 0.01f;
+
+		_camera.Update();
 		DrawGame();
 		CalculateFPS();
 
@@ -129,6 +134,9 @@ void MainGame::ProcessInput()
 {
 	SDL_Event event;
 
+	const float CAMERA_SPEED = 20.0f;
+	const float SCALE_SPEED = 0.1f;
+
 	while (SDL_PollEvent(&event))
 	{
 		switch (event.type)
@@ -138,6 +146,29 @@ void MainGame::ProcessInput()
 			break;
 		case SDL_MOUSEMOTION:
 			//std::cout << event.motion.x << " " << event.motion.y << std::endl;
+			break;
+		case SDL_KEYDOWN:
+			switch (event.key.keysym.sym)
+			{
+			case SDLK_w:
+				_camera.SetPosition(_camera.GetPosition() + glm::vec2(0.0f, CAMERA_SPEED));
+				break;
+			case SDLK_s:
+				_camera.SetPosition(_camera.GetPosition() + glm::vec2(0.0f, -CAMERA_SPEED));
+				break;
+			case SDLK_a:
+				_camera.SetPosition(_camera.GetPosition() + glm::vec2(-CAMERA_SPEED, 0.0f));
+				break;
+			case SDLK_d:
+				_camera.SetPosition(_camera.GetPosition() + glm::vec2(CAMERA_SPEED, 0.0f));
+				break;
+			case SDLK_q:
+				_camera.SetScale(_camera.GetScale() + SCALE_SPEED);
+				break;
+			case SDLK_e:
+				_camera.SetScale(_camera.GetScale() - SCALE_SPEED);
+				break;
+			}
 			break;
 		}
 	}
@@ -157,6 +188,12 @@ void MainGame::DrawGame()
 	GLint timeLocation = _colourProgram.GetUniformLocation("time");
 
 	glUniform1f(timeLocation, _time);
+
+	GLint pLocation = _colourProgram.GetUniformLocation("P");
+
+	glm::mat4 cameraMatrix = _camera.getCameraMatrix();
+
+	glUniformMatrix4fv(pLocation, 1, GL_FALSE, &(cameraMatrix[0][0]));
 
 	for (int i = 0; i < _sprites.size(); i++)
 	{

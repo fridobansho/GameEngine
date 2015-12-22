@@ -8,6 +8,7 @@
 #include <GameEngine/Sprite.h>
 #include <GameEngine/GLTexture.h>
 #include <GameEngine/Window.h>
+#include <GameEngine/Camera2D.h>
 
 enum class GameState
 {
@@ -38,6 +39,7 @@ private:
 	GameState _gameState;
 	std::vector<GameEngine::Sprite*> _sprites;
 	GameEngine::GLSLProgram _colourProgram;
+	GameEngine::Camera2D _camera;
 	float _time;
 	float _fps;
 	float _maxFPS;

@@ -70,19 +70,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>..\packages\glew.1.9.0.1\build\native\include;..\packages\sdl2.2.0.3\build\native\include;..\packages\glm.0.9.7.1\build\native\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\packages\glew.1.9.0.1\build\native\lib\v110\Win32\Debug\dynamic;..\packages\sdl2.2.0.3\build\native\lib\Win32\dynamic;$(LibraryPath)</LibraryPath>
+    <LibraryPath>
+    </LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>..\packages\glew.1.9.0.1\build\native\include;..\packages\sdl2.2.0.3\build\native\include;..\packages\glm.0.9.7.1\build\native\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\packages\glew.1.9.0.1\build\native\lib\v110\Win32\Release\dynamic;..\packages\sdl2.2.0.3\build\native\lib\Win32\dynamic;$(LibraryPath)</LibraryPath>
+    <LibraryPath>
+    </LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>..\packages\glew.1.9.0.1\build\native\include;..\packages\sdl2.2.0.3\build\native\include;..\packages\glm.0.9.7.1\build\native\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\packages\glew.1.9.0.1\build\native\lib\v110\x64\Release\dynamic;..\packages\sdl2.2.0.3\build\native\lib\x64\dynamic;$(LibraryPath)</LibraryPath>
+    <LibraryPath>
+    </LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>..\packages\glew.1.9.0.1\build\native\include;..\packages\sdl2.2.0.3\build\native\include;..\packages\glm.0.9.7.1\build\native\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\packages\glew.1.9.0.1\build\native\lib\v110\x64\Debug\dynamic;..\packages\sdl2.2.0.3\build\native\lib\x64\dynamic;$(LibraryPath)</LibraryPath>
+    <LibraryPath>
+    </LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -153,6 +157,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera2D.cpp" />
     <ClCompile Include="Errors.cpp" />
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="GLSLProgram.cpp" />
@@ -168,6 +173,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera2D.h" />
     <ClInclude Include="Errors.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="GLSLProgram.h" />
