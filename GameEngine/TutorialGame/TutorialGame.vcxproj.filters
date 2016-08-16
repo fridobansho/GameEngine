@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Textures">
+      <UniqueIdentifier>{67648cee-cc0c-4cd1-adb0-7e5d6b391545}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{442b8608-dffa-4bcf-92c8-38cbec6eba8d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -29,5 +35,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Shaders\colourShading.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\colourShading.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

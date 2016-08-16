@@ -27,6 +27,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Shaders\colourShading.frag" />
+    <None Include="Shaders\colourShading.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E661DA35-CFD2-4256-BA71-6F3FBAC5C226}</ProjectGuid>
