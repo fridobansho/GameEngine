@@ -10,6 +10,8 @@
 #include <GameEngine/Window.h>
 #include <GameEngine/Camera2D.h>
 #include <GameEngine/SpriteBatch.h>
+#include <GameEngine/InputManager.h>
+#include <GameEngine/Timing.h>
 
 enum class GameState
 {
@@ -32,8 +34,6 @@ private:
 	void DrawGame();
 	void GameLoop();
 
-	void CalculateFPS();
-
 	GameEngine::Window _window;
 	int _screenWidth;
 	int _screenHeight;
@@ -41,10 +41,11 @@ private:
 	GameEngine::GLSLProgram _colourProgram;
 	GameEngine::Camera2D _camera;
 	GameEngine::SpriteBatch _spriteBatch;
+	GameEngine::InputManager _inputManager;
+	GameEngine::FPSLimiter _fpsLimiter;
 
-	float _time;
-	float _fps;
 	float _maxFPS;
-	float _frameTime;
+	float _fps;
+	float _time;
 };
 
