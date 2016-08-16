@@ -31,6 +31,10 @@ namespace GameEngine {
 
 		UV uv;
 
+		void setColour(Colour colour)
+		{
+			setColour(colour.r, colour.g, colour.b, colour.a);
+		}
 		void setColour(GLubyte r, GLubyte g, GLubyte b, GLubyte a)
 		{
 			colour.r = r;
@@ -39,10 +43,20 @@ namespace GameEngine {
 			colour.a = a;
 		}
 
+		void setUV(UV uv)
+		{
+			setUV(uv.u, uv.v);
+		}
+
 		void setUV(float u, float v)
 		{
 			uv.u = u;
 			uv.v = v;
+		}
+
+		void setPosition(Position position)
+		{
+			setPosition(position.x, position.y);
 		}
 
 		void setPosition(float x, float y)
