@@ -13,6 +13,8 @@
 #include <GameEngine/InputManager.h>
 #include <GameEngine/Timing.h>
 
+#include "Bullet.h"
+
 enum class GameState
 {
 	PLAY,
@@ -43,6 +45,8 @@ private:
 	GameEngine::SpriteBatch _spriteBatch;
 	GameEngine::InputManager _inputManager;
 	GameEngine::FPSLimiter _fpsLimiter;
+
+	std::vector<Bullet> _bullets;
 
 	float _maxFPS;
 	float _fps;

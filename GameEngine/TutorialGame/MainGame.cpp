@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 #include "MainGame.h"
 #include <GameEngine/Sprite.h>
@@ -62,6 +63,18 @@ void MainGame::GameLoop()
 		_time += 0.01f;
 
 		_camera.Update();
+
+		for (int i = 0; i < _bullets.size();)
+		{
+			if (_bullets[i].update())
+			{
+				_bullets[i] = _bullets.back();
+				_bullets.pop_back();
+			}
+			else
+				i++;
+		}
+
 		DrawGame();
 
 		_fps = _fpsLimiter.end();
@@ -131,7 +144,14 @@ void MainGame::ProcessInput()
 	{
 		glm::vec2 mouseCoords = _inputManager.getMouseCoords();
 		mouseCoords = _camera.convertScreenToWorld(mouseCoords);
-		std::cout << mouseCoords.x << " " << mouseCoords.y << std::endl;
+
+		glm::vec2 playerPosition(0.0f);
+
+		glm::vec2 direction = mouseCoords - playerPosition;
+
+		direction = glm::normalize(direction);
+
+		_bullets.emplace_back(playerPosition, direction, 5.00f, 1000);
 	}
 }
 
@@ -165,6 +185,11 @@ void MainGame::DrawGame()
 	colour.a = 255;
 
 	_spriteBatch.draw(position, uv, texture.id, 0.0f, colour);
+
+	for (int i = 0; i < _bullets.size(); i++)
+	{
+		_bullets[i].draw(_spriteBatch);
+	}
 
 	_spriteBatch.end();
 
