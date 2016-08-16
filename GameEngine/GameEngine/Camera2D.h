@@ -13,6 +13,8 @@ namespace GameEngine
 		void Init(int, int);
 		void Update();
 
+		glm::vec2 convertScreenToWorld(glm::vec2 screenCoords);
+
 		void SetPosition(const glm::vec2& newPosition) { _position = newPosition; _needsMatrixUpdate = true;	}
 		void SetScale(float newScale) { _scale = newScale; _needsMatrixUpdate = true; }
 

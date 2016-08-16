@@ -69,7 +69,7 @@ void MainGame::GameLoop()
 		static int frameCounter = 0;
 		frameCounter++;
 
-		if (frameCounter == 10)
+		if (frameCounter == 10000)
 		{
 			frameCounter = 0;
 			std::cout << _fps << std::endl;
@@ -92,13 +92,19 @@ void MainGame::ProcessInput()
 			_gameState = GameState::EXIT;
 			break;
 		case SDL_MOUSEMOTION:
-			//std::cout << event.motion.x << " " << event.motion.y << std::endl;
+			_inputManager.setMouseCoords(event.motion.x, event.motion.y);
 			break;
 		case SDL_KEYDOWN:
 			_inputManager.pressKey(event.key.keysym.sym);
 			break;
 		case SDL_KEYUP:
 			_inputManager.releaseKey(event.key.keysym.sym);
+			break;
+		case SDL_MOUSEBUTTONDOWN:
+			_inputManager.pressKey(event.button.button);
+			break;
+		case SDL_MOUSEBUTTONUP:
+			_inputManager.releaseKey(event.button.button);
 			break;
 		}
 	}
@@ -120,6 +126,13 @@ void MainGame::ProcessInput()
 
 	if (_inputManager.isKeyPressed(SDLK_e))
 		_camera.SetScale(_camera.GetScale() - SCALE_SPEED);
+
+	if (_inputManager.isKeyPressed(SDL_BUTTON_LEFT))
+	{
+		glm::vec2 mouseCoords = _inputManager.getMouseCoords();
+		mouseCoords = _camera.convertScreenToWorld(mouseCoords);
+		std::cout << mouseCoords.x << " " << mouseCoords.y << std::endl;
+	}
 }
 
 void MainGame::DrawGame()
@@ -152,7 +165,6 @@ void MainGame::DrawGame()
 	colour.a = 255;
 
 	_spriteBatch.draw(position, uv, texture.id, 0.0f, colour);
-	_spriteBatch.draw(position + glm::vec4(50, 0, 0, 0), uv, texture.id, 0.0f, colour);
 
 	_spriteBatch.end();
 

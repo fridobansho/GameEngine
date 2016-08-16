@@ -2,7 +2,7 @@
 
 using namespace GameEngine;
 
-InputManager::InputManager()
+InputManager::InputManager() : _mouseCoords(0.0f)
 {
 }
 
@@ -19,6 +19,12 @@ void GameEngine::InputManager::pressKey(unsigned int keyId)
 void GameEngine::InputManager::releaseKey(unsigned int keyId)
 {
 	_keyMap[keyId] = false;
+}
+
+void GameEngine::InputManager::setMouseCoords(float x, float y)
+{
+	_mouseCoords.x = x;
+	_mouseCoords.y = y;
 }
 
 bool GameEngine::InputManager::isKeyPressed(unsigned int keyId)
