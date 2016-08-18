@@ -31,11 +31,7 @@ Level::Level(const string & fileName)
 	_spriteBatch.begin();
 
 	glm::vec4 uvRect(0.0f, 0.0f, 1.0f, 1.0f);
-	GameEngine::Colour whiteColour;
-	whiteColour.r = 255;
-	whiteColour.g = 255;
-	whiteColour.b = 255;
-	whiteColour.a = 255;
+	GameEngine::ColourRGBA8 whiteColour(255, 255, 255, 255);
 
 	for (int y = 0; y < _levelData.size(); y++)
 	{

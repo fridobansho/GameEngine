@@ -38,7 +38,7 @@ protected:
 
 	glm::vec2 _position;
 	float _speed;
-	GameEngine::Colour _colour;
+	GameEngine::ColourRGBA8 _colour;
 
 	float _health;
 };

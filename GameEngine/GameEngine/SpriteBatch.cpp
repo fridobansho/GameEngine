@@ -34,7 +34,7 @@ void GameEngine::SpriteBatch::end()
 	createRenderBatches();
 }
 
-void GameEngine::SpriteBatch::draw(const glm::vec4 & destRect, const glm::vec4 & uvRect, GLuint texture, float depth, const Colour & colour)
+void GameEngine::SpriteBatch::draw(const glm::vec4 & destRect, const glm::vec4 & uvRect, GLuint texture, float depth, const ColourRGBA8 & colour)
 {
 	Glyph* newGlyph = new Glyph();
 

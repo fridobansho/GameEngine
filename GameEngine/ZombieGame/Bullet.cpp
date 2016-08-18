@@ -32,11 +32,7 @@ void Bullet::draw(GameEngine::SpriteBatch& spriteBatch)
 
 	const glm::vec4 uvRect(0.0f, 0.0f, 1.0f, 1.0f);
 
-	GameEngine::Colour colour;
-	colour.r = 75;
-	colour.g = 75;
-	colour.b = 75;
-	colour.a = 255;
+	GameEngine::ColourRGBA8 colour(75, 75, 75, 255);
 
 	spriteBatch.draw(destRect, uvRect, GameEngine::ResourceManager::GetTexture("Textures/circle.png").id, 0.0f, colour);
 }

@@ -9,8 +9,11 @@ namespace GameEngine {
 		float y;
 	};
 
-	struct Colour
+	struct ColourRGBA8
 	{
+		ColourRGBA8() : r(0), g(0), b(0), a(0) {}
+		ColourRGBA8(GLubyte R, GLubyte G, GLubyte B, GLubyte A) :
+			r(R), g(G), b(B), a(A) {}
 		GLubyte r;
 		GLubyte g;
 		GLubyte b;
@@ -27,20 +30,17 @@ namespace GameEngine {
 	{
 		Position position;
 
-		Colour colour;
+		ColourRGBA8 colour;
 
 		UV uv;
 
-		void setColour(Colour colour)
+		void setColour(ColourRGBA8 colour)
 		{
 			setColour(colour.r, colour.g, colour.b, colour.a);
 		}
 		void setColour(GLubyte r, GLubyte g, GLubyte b, GLubyte a)
 		{
-			colour.r = r;
-			colour.g = g;
-			colour.b = b;
-			colour.a = a;
+			colour = ColourRGBA8(r, g, b, a);
 		}
 
 		void setUV(UV uv)

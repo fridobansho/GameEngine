@@ -122,25 +122,25 @@ void MainGame::ProcessInput()
 		}
 	}
 
-	if(_inputManager.isKeyPressed(SDLK_w))
+	if(_inputManager.isKeyDown(SDLK_w))
 		_camera.SetPosition(_camera.GetPosition() + glm::vec2(0.0f, CAMERA_SPEED));
 
-	if (_inputManager.isKeyPressed(SDLK_s))
+	if (_inputManager.isKeyDown(SDLK_s))
 		_camera.SetPosition(_camera.GetPosition() + glm::vec2(0.0f, -CAMERA_SPEED));
 
-	if (_inputManager.isKeyPressed(SDLK_a))
+	if (_inputManager.isKeyDown(SDLK_a))
 		_camera.SetPosition(_camera.GetPosition() + glm::vec2(-CAMERA_SPEED, 0.0f));
 
-	if (_inputManager.isKeyPressed(SDLK_d))
+	if (_inputManager.isKeyDown(SDLK_d))
 		_camera.SetPosition(_camera.GetPosition() + glm::vec2(CAMERA_SPEED, 0.0f));
 
-	if (_inputManager.isKeyPressed(SDLK_q))
+	if (_inputManager.isKeyDown(SDLK_q))
 		_camera.SetScale(_camera.GetScale() + SCALE_SPEED);
 
-	if (_inputManager.isKeyPressed(SDLK_e))
+	if (_inputManager.isKeyDown(SDLK_e))
 		_camera.SetScale(_camera.GetScale() - SCALE_SPEED);
 
-	if (_inputManager.isKeyPressed(SDL_BUTTON_LEFT))
+	if (_inputManager.isKeyDown(SDL_BUTTON_LEFT))
 	{
 		glm::vec2 mouseCoords = _inputManager.getMouseCoords();
 		mouseCoords = _camera.convertScreenToWorld(mouseCoords);
@@ -178,11 +178,7 @@ void MainGame::DrawGame()
 	glm::vec4 uv(0.0f, 0.0f, 1.0f, 1.0f);
 
 	static GLTexture texture = ResourceManager::GetTexture("Textures/jimmyJump_pack/PNG/CharacterRight_Standing.png");
-	Colour colour;
-	colour.r = 255;
-	colour.g = 255;
-	colour.b = 255;
-	colour.a = 255;
+	ColourRGBA8 colour(255, 255, 255, 255);
 
 	_spriteBatch.draw(position, uv, texture.id, 0.0f, colour);
 

@@ -16,11 +16,7 @@ Bullet::~Bullet()
 
 void Bullet::draw(SpriteBatch & spriteBatch)
 {
-	Colour colour;
-	colour.r = 255;
-	colour.g = 255;
-	colour.b = 255;
-	colour.a = 255;
+	ColourRGBA8 colour(255, 255, 255, 255);
 
 	glm::vec4 uv(0.0f, 0.0f, 1.0f, 1.0f);
 	static GLTexture texture = ResourceManager::GetTexture("Textures/jimmyJump_pack/PNG/CharacterRight_Standing.png");
