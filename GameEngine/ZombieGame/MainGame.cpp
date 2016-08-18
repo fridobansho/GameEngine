@@ -8,6 +8,7 @@
 #include <iostream>
 #include <random>
 #include <ctime>
+#include <algorithm>
 
 #include "Gun.h"
 
@@ -113,15 +114,29 @@ void MainGame::initShaders()
 
 void MainGame::gameLoop()
 {
+	const float DESIRED_FPS = 60.0f;
+	const int MAX_PHYSICS_STEPS = 6;
 	GameEngine::FPSLimiter fpsLimiter;
-	fpsLimiter.setMaxFPS(6000.0f);
+	fpsLimiter.setMaxFPS(DESIRED_FPS);
 
 	const float CAMERA_SCALE = 1.0f / 4.0f;
 	_camera.SetScale(CAMERA_SCALE);
 
+	const float MS_PER_SECOND = 1000.0f;
+	const float DESIRED_FRAMETIME = MS_PER_SECOND / DESIRED_FPS;
+	const float MAX_DELTA_TIME = 1.0f;
+
+	float previousTicks = SDL_GetTicks();
+
 	while (_gameState == GameState::PLAY)
 	{
 		fpsLimiter.begin();
+
+		float newTicks = SDL_GetTicks();
+		float frameTime = newTicks - previousTicks;
+		previousTicks = newTicks;
+
+		float totalDeltaTime = frameTime / DESIRED_FRAMETIME;
 
 		checkVictory();
 
@@ -129,9 +144,17 @@ void MainGame::gameLoop()
 
 		processInput();
 
-		updateAgents();
+		int i = 0;
+		while (totalDeltaTime > 0.0f && i < MAX_PHYSICS_STEPS)
+		{
+			float deltaTime = std::min(totalDeltaTime, MAX_DELTA_TIME);
+			updateAgents(deltaTime);
 
-		updateBullets();
+			updateBullets(deltaTime);
+
+			totalDeltaTime -= deltaTime;
+			i++;
+		}
 
 		_camera.SetPosition(_player->getPosition());
 
@@ -140,20 +163,19 @@ void MainGame::gameLoop()
 		drawGame();
 
 		_fps = fpsLimiter.end();
-		cout << _fps << endl;
 	}
 }
 
-void MainGame::updateAgents()
+void MainGame::updateAgents(float deltaTime)
 {
 	for (int i = 0; i < _humans.size(); i++)
 	{
-		_humans[i]->update(_levels[_currentLevel]->getLevelData(), _humans, _zombies);
+		_humans[i]->update(_levels[_currentLevel]->getLevelData(), _humans, _zombies, deltaTime);
 	}
 
 	for (int i = 0; i < _zombies.size(); i++)
 	{
-		_zombies[i]->update(_levels[_currentLevel]->getLevelData(), _humans, _zombies);
+		_zombies[i]->update(_levels[_currentLevel]->getLevelData(), _humans, _zombies, deltaTime);
 	}
 
 	for (int i = 0; i < _zombies.size(); i++)
@@ -189,11 +211,11 @@ void MainGame::updateAgents()
 	}
 }
 
-void MainGame::updateBullets()
+void MainGame::updateBullets(float deltaTime)
 {
 	for (int i = 0; i < _bullets.size();)
 	{
-		if (_bullets[i].update(_levels[_currentLevel]->getLevelData()))
+		if (_bullets[i].update(_levels[_currentLevel]->getLevelData(), deltaTime))
 		{
 			_bullets[i] = _bullets.back();
 			_bullets.pop_back();

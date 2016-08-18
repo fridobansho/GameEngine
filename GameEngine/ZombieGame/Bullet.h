@@ -16,7 +16,7 @@ public:
 	Bullet(glm::vec2 position, glm::vec2 direction, float damage, float speed);
 	~Bullet();
 
-	bool update(const std::vector<std::string>& levelData);
+	bool update(const std::vector<std::string>& levelData, float deltaTime);
 
 	void draw(GameEngine::SpriteBatch& spriteBatch);
 

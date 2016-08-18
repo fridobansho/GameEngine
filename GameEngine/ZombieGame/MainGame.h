@@ -38,9 +38,9 @@ private:
     /// Main game loop for the program
     void gameLoop();
 
-	void updateAgents();
+	void updateAgents(float deltaTime);
 
-	void updateBullets();
+	void updateBullets(float deltaTime);
 
 	void checkVictory();
 
