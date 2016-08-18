@@ -13,6 +13,8 @@ namespace GameEngine
 		void Init(int, int);
 		void Update();
 
+		bool isBoxInView(const glm::vec2& position, const glm::vec2& dimensions);
+
 		glm::vec2 convertScreenToWorld(glm::vec2 screenCoords);
 
 		void SetPosition(const glm::vec2& newPosition) { _position = newPosition; _needsMatrixUpdate = true;	}
