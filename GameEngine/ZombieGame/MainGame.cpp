@@ -98,8 +98,8 @@ void MainGame::initLevel()
 
 	const float BULLET_SPEED = 20.0f;
 	_player->AddGun(new Gun("Magnum", 10, 1, 0.125f, 30, BULLET_SPEED));
-	_player->AddGun(new Gun("Shotgun", 30, 12, 0.4f, 4, BULLET_SPEED));
-	_player->AddGun(new Gun("MP5", 2, 1, 0.4f, 20, BULLET_SPEED));
+	_player->AddGun(new Gun("Shotgun", 30, 12, 0.3f, 4, BULLET_SPEED));
+	_player->AddGun(new Gun("MP5", 2, 1, 0.3f, 20, BULLET_SPEED));
 }
 
 void MainGame::initShaders()
@@ -114,7 +114,10 @@ void MainGame::initShaders()
 void MainGame::gameLoop()
 {
 	GameEngine::FPSLimiter fpsLimiter;
-	fpsLimiter.setMaxFPS(60.0f);
+	fpsLimiter.setMaxFPS(6000.0f);
+
+	const float CAMERA_SCALE = 1.0f / 4.0f;
+	_camera.SetScale(CAMERA_SCALE);
 
 	while (_gameState == GameState::PLAY)
 	{
@@ -135,6 +138,7 @@ void MainGame::gameLoop()
 		drawGame();
 
 		_fps = fpsLimiter.end();
+		cout << _fps << endl;
 	}
 }
 
