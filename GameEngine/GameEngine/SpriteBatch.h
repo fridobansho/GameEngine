@@ -11,12 +11,34 @@ namespace GameEngine
 	{
 		NONE,
 		FRONT_TO_BACK,
-		BASCK_TO_FRONT,
+		BACK_TO_FRONT,
 		TEXTURE
 	};
 
-	struct Glyph
+	class Glyph
 	{
+	public:
+		Glyph() {}
+		Glyph(const glm::vec4 & destRect, const glm::vec4 & uvRect, GLuint Texture, float Depth, const ColourRGBA8 & colour) :
+			texture(Texture),
+			depth(Depth)
+		{
+			topLeft.setColour(colour);
+			topLeft.setPosition(destRect.x, destRect.y + destRect.w);
+			topLeft.setUV(uvRect.x, uvRect.y + uvRect.w);
+
+			bottomLeft.setColour(colour);
+			bottomLeft.setPosition(destRect.x, destRect.y);
+			bottomLeft.setUV(uvRect.x, uvRect.y);
+
+			bottomRight.setColour(colour);
+			bottomRight.setPosition(destRect.x + destRect.z, destRect.y);
+			bottomRight.setUV(uvRect.x + uvRect.z, uvRect.y);
+
+			topRight.setColour(colour);
+			topRight.setPosition(destRect.x + destRect.z, destRect.y + destRect.w);
+			topRight.setUV(uvRect.x + uvRect.z, uvRect.y + uvRect.w);
+		}
 		GLuint texture;
 		float depth;
 
@@ -65,7 +87,8 @@ namespace GameEngine
 
 		GlyphSortType _sortType;
 
-		std::vector<Glyph*> _glyphs;
+		std::vector<Glyph*> _glyphPointers;
+		std::vector<Glyph> _glyphs;
 		std::vector<RenderBatch> _renderBatches;
 	};
 }
