@@ -7,6 +7,8 @@
 #include <GameEngine/SpriteBatch.h>
 #include <GameEngine/SoA/SpriteFont.h>
 #include <GameEngine/AudioEngine.h>
+#include <GameEngine/ParticleEngine2D.h>
+#include <GameEngine/ParticleBatch2D.h>
 
 #include "Level.h"
 #include "Player.h"
@@ -54,6 +56,8 @@ private:
 
 	void drawHud();
 
+	void addBlood(const glm::vec2& position, int numParticles);
+
     /// Member Variables
     GameEngine::Window m_window; ///< The game window
 
@@ -68,6 +72,8 @@ private:
 	GameEngine::SpriteBatch m_agentSpriteBatch;
 	GameEngine::SpriteBatch m_hudSpriteBatch;
 	std::vector<Level*> m_levels;
+	GameEngine::ParticleEngine2D m_particleEngine;
+	GameEngine::ParticleBatch2D* m_bloodParticleBatch;
 
 	int m_screenWidth;
 	int m_screenHeight;

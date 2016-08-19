@@ -4,12 +4,14 @@
 #include <GameEngine/Timing.h>
 #include <GameEngine/GameEngineErrors.h>
 #include <GameEngine/SoA/SpriteFont.h>
+#include <GameEngine/ResourceManager.h>
 
 #include <SDL.h>
 #include <iostream>
 #include <random>
 #include <ctime>
 #include <algorithm>
+#include <glm/gtx/rotate_vector.hpp>
 
 #include "Gun.h"
 
@@ -76,6 +78,11 @@ void MainGame::initSystems() {
 	m_camera.Init(m_screenWidth, m_screenHeight);
 	m_hudCamera.Init(m_screenWidth, m_screenHeight);
 	m_hudCamera.SetPosition(glm::vec2(m_screenWidth / 2.0f, m_screenHeight / 2.0f));
+
+	m_bloodParticleBatch = new GameEngine::ParticleBatch2D();
+	m_bloodParticleBatch->init(1000, 0.05f, GameEngine::ResourceManager::GetTexture("Textures/particle.png"));
+	m_particleEngine.addParticleBatch(m_bloodParticleBatch);
+
 }
 
 void MainGame::initLevel()
@@ -163,6 +170,8 @@ void MainGame::gameLoop()
 
 			updateBullets(deltaTime);
 
+			m_particleEngine.update(deltaTime);
+
 			totalDeltaTime -= deltaTime;
 			i++;
 		}
@@ -245,6 +254,8 @@ void MainGame::updateBullets(float deltaTime)
 		{
 			if (m_bullets[i].collideWithAgent(m_zombies[j]))
 			{
+				addBlood(m_bullets[i].getPosition(), 5);
+
 				if (m_zombies[j]->applyDamage(m_bullets[i].getDamage()))
 				{
 					delete m_zombies[j];
@@ -269,6 +280,8 @@ void MainGame::updateBullets(float deltaTime)
 			{
 				if (m_bullets[i].collideWithAgent(m_humans[j]))
 				{
+					addBlood(m_bullets[i].getPosition(), 5);
+
 					if (m_humans[j]->applyDamage(m_bullets[i].getDamage()))
 					{
 						delete m_humans[j];
@@ -372,6 +385,8 @@ void MainGame::drawGame() {
 
 	m_agentSpriteBatch.renderBatch();
 
+	m_particleEngine.draw(&m_agentSpriteBatch);
+
 	drawHud();
 
 	m_colourProgram.UnUse();
@@ -403,4 +418,18 @@ void MainGame::drawHud()
 	m_hudSpriteBatch.end();
 
 	m_hudSpriteBatch.renderBatch();
+}
+
+void MainGame::addBlood(const glm::vec2 & position, int numParticles)
+{
+	static mt19937 randEngine(time(nullptr));
+	static uniform_real_distribution<float> randAngle(0.0f, 360.0f);
+
+	glm::vec2 velocity(2.0f, 0.0f);
+	GameEngine::ColourRGBA8 col(255, 0, 0, 255);
+
+	for (int i = 0; i < numParticles; i++)
+	{
+		m_bloodParticleBatch->addParticle(position, glm::rotate(velocity, randAngle(randEngine)), col, 30.0f);
+	}
 }
