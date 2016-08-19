@@ -61,9 +61,12 @@
   <ItemGroup>
     <Image Include="Textures\circle.png" />
     <Image Include="Textures\glass.png" />
+    <Image Include="Textures\human.png" />
     <Image Include="Textures\light_bricks.png" />
     <Image Include="Textures\particle.png" />
+    <Image Include="Textures\player.png" />
     <Image Include="Textures\red_bricks.png" />
+    <Image Include="Textures\zombie.png" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Levels\level1.txt" />

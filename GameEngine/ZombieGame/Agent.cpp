@@ -107,7 +107,6 @@ void Agent::collideWithTile(glm::vec2 tilePosition)
 
 void Agent::draw(GameEngine::SpriteBatch & spriteBatch)
 {
-	static GLint textureId = GameEngine::ResourceManager::GetTexture("Textures/circle.png").id;
 	glm::vec4 uvRect(0.0f, 0.0f, 1.0f, 1.0f);
 
 	glm::vec4 destRect;
@@ -116,7 +115,7 @@ void Agent::draw(GameEngine::SpriteBatch & spriteBatch)
 	destRect.z = AGENT_WIDTH;
 	destRect.w = AGENT_WIDTH;
 
-	spriteBatch.draw(destRect, uvRect, textureId, 0.0f, m_colour);
+	spriteBatch.draw(destRect, uvRect, m_textureID, 0.0f, m_colour, m_direction);
 }
 
 bool Agent::applyDamage(float damage)

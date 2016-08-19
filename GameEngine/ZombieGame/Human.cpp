@@ -2,6 +2,7 @@
 #include <ctime>
 #include <random>
 #include <glm/gtx/rotate_vector.hpp>
+#include <GameEngine/ResourceManager.h>
 
 Human::Human() : m_frames(0)
 {
@@ -22,10 +23,11 @@ void Human::init(float speed, glm::vec2 position)
 
 	m_health = 20.0f;
 
-	m_colour.r = 200;
-	m_colour.g = 0;
-	m_colour.b = 200;
+	m_colour.r = 255;
+	m_colour.g = 255;
+	m_colour.b = 255;
 	m_colour.a = 255;
+	m_textureID = GameEngine::ResourceManager::GetTexture("Textures/human.png").id;
 	m_direction = glm::vec2(randomDir(randomEngine), randomDir(randomEngine));
 	if (m_direction.length() == 0) m_direction = glm::vec2(1.0f, 0.0f);
 

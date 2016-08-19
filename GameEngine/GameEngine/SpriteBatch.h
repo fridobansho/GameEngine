@@ -19,26 +19,8 @@ namespace GameEngine
 	{
 	public:
 		Glyph() {}
-		Glyph(const glm::vec4 & destRect, const glm::vec4 & uvRect, GLuint Texture, float Depth, const ColourRGBA8 & colour) :
-			texture(Texture),
-			depth(Depth)
-		{
-			topLeft.setColour(colour);
-			topLeft.setPosition(destRect.x, destRect.y + destRect.w);
-			topLeft.setUV(uvRect.x, uvRect.y + uvRect.w);
-
-			bottomLeft.setColour(colour);
-			bottomLeft.setPosition(destRect.x, destRect.y);
-			bottomLeft.setUV(uvRect.x, uvRect.y);
-
-			bottomRight.setColour(colour);
-			bottomRight.setPosition(destRect.x + destRect.z, destRect.y);
-			bottomRight.setUV(uvRect.x + uvRect.z, uvRect.y);
-
-			topRight.setColour(colour);
-			topRight.setPosition(destRect.x + destRect.z, destRect.y + destRect.w);
-			topRight.setUV(uvRect.x + uvRect.z, uvRect.y + uvRect.w);
-		}
+		Glyph(const glm::vec4 & destRect, const glm::vec4 & uvRect, GLuint Texture, float Depth, const ColourRGBA8 & colour);
+		Glyph(const glm::vec4 & destRect, const glm::vec4 & uvRect, GLuint Texture, float Depth, const ColourRGBA8 & colour, float angle);
 		GLuint texture;
 		float depth;
 
@@ -46,6 +28,8 @@ namespace GameEngine
 		Vertex bottomLeft;
 		Vertex topRight;
 		Vertex bottomRight;
+	private:
+		glm::vec2 rotatePoint(glm::vec2 point, float angle);
 	};
 
 	class RenderBatch
@@ -71,6 +55,8 @@ namespace GameEngine
 		void end();
 
 		void draw(const glm::vec4& destRect, const glm::vec4& uvRect, GLuint texture, float depth, const ColourRGBA8& colour);
+		void draw(const glm::vec4& destRect, const glm::vec4& uvRect, GLuint texture, float depth, const ColourRGBA8& colour, float angle);
+		void draw(const glm::vec4& destRect, const glm::vec4& uvRect, GLuint texture, float depth, const ColourRGBA8& colour, const glm::vec2& direction);
 
 		void renderBatch();
 	private:

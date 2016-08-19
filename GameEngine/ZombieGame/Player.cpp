@@ -1,6 +1,7 @@
 #include "Player.h"
 
 #include <SDL.h>
+#include <GameEngine/ResourceManager.h>
 
 #include "Gun.h"
 
@@ -23,10 +24,11 @@ void Player::init(float speed, glm::vec2 position, GameEngine::InputManager* inp
 
 	m_camera = camera;
 	m_bullets = bullets;
-	m_colour.r = 0;
-	m_colour.g = 0;
-	m_colour.b = 185;
+	m_colour.r = 255;
+	m_colour.g = 255;
+	m_colour.b = 255;
 	m_colour.a = 255;
+	m_textureID = GameEngine::ResourceManager::GetTexture("Textures/player.png").id;
 }
 
 void Player::AddGun(Gun * gun)
@@ -74,16 +76,17 @@ void Player::update(const std::vector<std::string>& levelData,
 		m_currentGunIndex = 2;
 	}
 
+	glm::vec2 mouseCoords = m_inputManager->getMouseCoords();
+	mouseCoords = m_camera->convertScreenToWorld(mouseCoords);
+
+	glm::vec2 centerPosition = m_position + glm::vec2(AGENT_RADIUS);
+	m_direction = glm::normalize(mouseCoords - centerPosition);
+
 	if(m_currentGunIndex != -1)
 	{
-		glm::vec2 mouseCoords = m_inputManager->getMouseCoords();
-		mouseCoords = m_camera->convertScreenToWorld(mouseCoords);
-		glm::vec2 centerPosition = m_position + glm::vec2(AGENT_RADIUS);
-		glm::vec2 direction = glm::normalize(mouseCoords - centerPosition);
-
 		m_guns[m_currentGunIndex]->update(m_inputManager->isKeyDown(SDL_BUTTON_LEFT),
 			centerPosition,
-			direction,
+			m_direction,
 			*m_bullets,
 			deltaTime);
 	}

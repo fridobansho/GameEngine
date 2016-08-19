@@ -139,6 +139,15 @@
     <Image Include="Textures\particle.png">
       <Filter>Textures</Filter>
     </Image>
+    <Image Include="Textures\human.png">
+      <Filter>Textures</Filter>
+    </Image>
+    <Image Include="Textures\player.png">
+      <Filter>Textures</Filter>
+    </Image>
+    <Image Include="Textures\zombie.png">
+      <Filter>Textures</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Levels\level1.txt">
