@@ -80,7 +80,12 @@ void MainGame::initSystems() {
 	m_hudCamera.SetPosition(glm::vec2(m_screenWidth / 2.0f, m_screenHeight / 2.0f));
 
 	m_bloodParticleBatch = new GameEngine::ParticleBatch2D();
-	m_bloodParticleBatch->init(1000, 0.05f, GameEngine::ResourceManager::GetTexture("Textures/particle.png"));
+	m_bloodParticleBatch->init(1000, 0.05f,
+		GameEngine::ResourceManager::GetTexture("Textures/particle.png"),
+		[](GameEngine::Particle2D& particle, float deltaTime) {
+		particle.position += particle.velocity * deltaTime;
+		particle.colour.a = (GLubyte)(particle.life * 255.0f);
+	});
 	m_particleEngine.addParticleBatch(m_bloodParticleBatch);
 
 }
