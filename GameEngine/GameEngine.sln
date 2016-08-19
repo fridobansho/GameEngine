@@ -17,28 +17,20 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZombieGame", "ZombieGame\Zo
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
-		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{85D67627-CC2B-4C99-BE63-2C41FE6E0DAB}.Debug|x64.ActiveCfg = Debug|Win32
 		{85D67627-CC2B-4C99-BE63-2C41FE6E0DAB}.Debug|x86.ActiveCfg = Debug|Win32
 		{85D67627-CC2B-4C99-BE63-2C41FE6E0DAB}.Debug|x86.Build.0 = Debug|Win32
-		{85D67627-CC2B-4C99-BE63-2C41FE6E0DAB}.Release|x64.ActiveCfg = Release|Win32
 		{85D67627-CC2B-4C99-BE63-2C41FE6E0DAB}.Release|x86.ActiveCfg = Release|Win32
 		{85D67627-CC2B-4C99-BE63-2C41FE6E0DAB}.Release|x86.Build.0 = Release|Win32
-		{E661DA35-CFD2-4256-BA71-6F3FBAC5C226}.Debug|x64.ActiveCfg = Debug|Win32
 		{E661DA35-CFD2-4256-BA71-6F3FBAC5C226}.Debug|x86.ActiveCfg = Debug|Win32
 		{E661DA35-CFD2-4256-BA71-6F3FBAC5C226}.Debug|x86.Build.0 = Debug|Win32
-		{E661DA35-CFD2-4256-BA71-6F3FBAC5C226}.Release|x64.ActiveCfg = Release|Win32
 		{E661DA35-CFD2-4256-BA71-6F3FBAC5C226}.Release|x86.ActiveCfg = Release|Win32
 		{E661DA35-CFD2-4256-BA71-6F3FBAC5C226}.Release|x86.Build.0 = Release|Win32
-		{3BD2E907-C068-442C-992C-ACA6F67EE54F}.Debug|x64.ActiveCfg = Debug|Win32
 		{3BD2E907-C068-442C-992C-ACA6F67EE54F}.Debug|x86.ActiveCfg = Debug|Win32
 		{3BD2E907-C068-442C-992C-ACA6F67EE54F}.Debug|x86.Build.0 = Debug|Win32
-		{3BD2E907-C068-442C-992C-ACA6F67EE54F}.Release|x64.ActiveCfg = Release|Win32
 		{3BD2E907-C068-442C-992C-ACA6F67EE54F}.Release|x86.ActiveCfg = Release|Win32
 		{3BD2E907-C068-442C-992C-ACA6F67EE54F}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection

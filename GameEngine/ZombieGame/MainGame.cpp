@@ -3,6 +3,7 @@
 #include <GameEngine/GameEngine.h>
 #include <GameEngine/Timing.h>
 #include <GameEngine/Errors.h>
+#include <GameEngine/SoA/SpriteFont.h>
 
 #include <SDL.h>
 #include <iostream>
@@ -63,8 +64,13 @@ void MainGame::initSystems() {
 	initShaders();
 
 	_agentSpriteBatch.init();
+	_hudSpriteBatch.init();
+
+	_spriteFont = new GameEngine::SpriteFont("Fonts/chintzy.ttf", 64);
 
 	_camera.Init(_screenWidth, _screenHeight);
+	_hudCamera.Init(_screenWidth, _screenHeight);
+	_hudCamera.SetPosition(glm::vec2(_screenWidth / 2.0f, _screenHeight / 2.0f));
 }
 
 void MainGame::initLevel()
@@ -159,6 +165,7 @@ void MainGame::gameLoop()
 		_camera.SetPosition(_player->getPosition());
 
 		_camera.Update();
+		_hudCamera.Update();
 
 		drawGame();
 
@@ -360,8 +367,35 @@ void MainGame::drawGame() {
 
 	_agentSpriteBatch.renderBatch();
 
+	drawHud();
+
 	_colourProgram.UnUse();
 
     // Swap our buffer and draw everything to the screen!
     _window.Swap();
+}
+
+void MainGame::drawHud()
+{
+	char buffer[256];
+
+	glm::mat4 projectionMatrix = _hudCamera.getCameraMatrix();
+	GLint pUniform = _colourProgram.GetUniformLocation("P");
+	glUniformMatrix4fv(pUniform, 1, GL_FALSE, &projectionMatrix[0][0]);
+
+	_hudSpriteBatch.begin();
+
+	sprintf_s(buffer, "Num Humans %d", _humans.size());
+
+	_spriteFont->draw(_hudSpriteBatch, buffer, glm::vec2(0, 0),
+		glm::vec2(0.5), 0.0f, GameEngine::ColourRGBA8(255, 255, 255, 255));
+
+	sprintf_s(buffer, "Num Zombies %d", _zombies.size());
+
+	_spriteFont->draw(_hudSpriteBatch, buffer, glm::vec2(0, 36),
+		glm::vec2(0.5), 0.0f, GameEngine::ColourRGBA8(255, 255, 255, 255));
+
+	_hudSpriteBatch.end();
+
+	_hudSpriteBatch.renderBatch();
 }

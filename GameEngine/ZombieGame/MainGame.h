@@ -5,6 +5,7 @@
 #include <GameEngine/Camera2D.h>
 #include <GameEngine/InputManager.h>
 #include <GameEngine/SpriteBatch.h>
+#include <GameEngine/SoA/SpriteFont.h>
 
 #include "Level.h"
 #include "Player.h"
@@ -50,6 +51,8 @@ private:
     /// Renders the game
     void drawGame();
 
+	void drawHud();
+
     /// Member Variables
     GameEngine::Window _window; ///< The game window
 
@@ -60,7 +63,9 @@ private:
     GameEngine::InputManager _inputManager; ///< Handles input
 
     GameEngine::Camera2D _camera; ///< Main Camera
+	GameEngine::Camera2D _hudCamera;
 	GameEngine::SpriteBatch _agentSpriteBatch;
+	GameEngine::SpriteBatch _hudSpriteBatch;
 	std::vector<Level*> _levels;
 
 	int _screenWidth;
@@ -80,5 +85,7 @@ private:
 
 	int _numHumansKilled;
 	int _numZombiesKilled;
+
+	GameEngine::SpriteFont* _spriteFont;
 };
 
