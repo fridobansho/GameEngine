@@ -4,7 +4,7 @@
 
 #include "MainGame.h"
 #include <GameEngine/Sprite.h>
-#include <GameEngine/Errors.h>
+#include <GameEngine/GameEngineErrors.h>
 #include <GameEngine/GameEngine.h>
 #include <GameEngine/ResourceManager.h>
 #include <GameEngine/Camera2D.h>

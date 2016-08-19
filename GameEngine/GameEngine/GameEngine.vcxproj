@@ -42,14 +42,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\packages\glew.1.9.0.1\build\native\include;..\packages\sdl2.2.0.3\build\native\include;..\packages\glm.0.9.7.1\build\native\include;$(IncludePath)</IncludePath>
-    <LibraryPath>
-    </LibraryPath>
+    <IncludePath>..\packages\SDL2_mixer-2.0.1\include;..\packages\sdl2_mixer.2.0.0\content;..\packages\sdl2_ttf.v140.2.0.14\build\native\include;..\packages\glew.1.9.0.1\build\native\include;..\packages\sdl2.2.0.3\build\native\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\packages\SDL2_mixer-2.0.1\lib\x86;..\packages\sdl2_ttf.v140.2.0.14\build\native\lib\Win32\Debug;..\packages\glew.1.9.0.1\build\native\lib\v110\Win32\Debug\dynamic;..\packages\sdl2.2.0.3\build\native\lib\Win32\dynamic;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>..\packages\glew.1.9.0.1\build\native\include;..\packages\sdl2.2.0.3\build\native\include;..\packages\glm.0.9.7.1\build\native\include;$(IncludePath)</IncludePath>
-    <LibraryPath>
-    </LibraryPath>
+    <IncludePath>..\packages\SDL2_mixer-2.0.1\include;..\packages\sdl2_mixer.2.0.0\content;..\packages\sdl2_ttf.v140.2.0.14\build\native\include;..\packages\glew.1.9.0.1\build\native\include;..\packages\sdl2.2.0.3\build\native\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\packages\SDL2_mixer-2.0.1\lib\x86;..\packages\sdl2_ttf.v140.2.0.14\build\native\lib\Win32\Release;..\packages\glew.1.9.0.1\build\native\lib\v110\Win32\Release\dynamic;..\packages\sdl2.2.0.3\build\native\lib\Win32\dynamic;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -65,6 +63,9 @@
     <PostBuildEvent>
       <Command>copy "..\packages\glew.redist.1.9.0.1\build\native\bin\v110\$(Platform)\$(Configuration)\dynamic" "$(TargetDir)"</Command>
     </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>$(ProjectDir)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -84,10 +85,14 @@
     <PostBuildEvent>
       <Command>copy "..\packages\glew.redist.1.9.0.1\build\native\bin\v110\$(Platform)\$(Configuration)\dynamic" "$(TargetDir)"</Command>
     </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>$(ProjectDir)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AudioEngine.cpp" />
     <ClCompile Include="Camera2D.cpp" />
-    <ClCompile Include="Errors.cpp" />
+    <ClCompile Include="GameEngineErrors.cpp" />
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="GLSLProgram.cpp" />
     <ClCompile Include="ImageLoader.cpp" />
@@ -106,8 +111,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AudioEngine.h" />
     <ClInclude Include="Camera2D.h" />
-    <ClInclude Include="Errors.h" />
+    <ClInclude Include="GameEngineErrors.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="GLSLProgram.h" />
     <ClInclude Include="GLTexture.h" />

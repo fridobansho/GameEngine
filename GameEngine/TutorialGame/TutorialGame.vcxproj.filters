@@ -47,5 +47,26 @@
     <None Include="Shaders\colourShading.vert">
       <Filter>Shaders</Filter>
     </None>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\SDL2_mixer.dll">
+      <Filter>Resource Files</Filter>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\libFLAC-8.dll">
+      <Filter>Resource Files</Filter>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\libmodplug-1.dll">
+      <Filter>Resource Files</Filter>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\libogg-0.dll">
+      <Filter>Resource Files</Filter>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\libvorbis-0.dll">
+      <Filter>Resource Files</Filter>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\libvorbisfile-3.dll">
+      <Filter>Resource Files</Filter>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\smpeg2.dll">
+      <Filter>Resource Files</Filter>
+    </Content>
   </ItemGroup>
 </Project>

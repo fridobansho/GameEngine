@@ -6,6 +6,7 @@
 #include <GameEngine/InputManager.h>
 #include <GameEngine/SpriteBatch.h>
 #include <GameEngine/SoA/SpriteFont.h>
+#include <GameEngine/AudioEngine.h>
 
 #include "Level.h"
 #include "Player.h"
@@ -87,5 +88,7 @@ private:
 	int m_numZombiesKilled;
 
 	GameEngine::SpriteFont* m_spriteFont;
+
+	GameEngine::AudioEngine m_audioEngine;
 };
 

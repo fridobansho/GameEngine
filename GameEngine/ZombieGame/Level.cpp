@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream>
 
-#include <GameEngine/Errors.h>
+#include <GameEngine/GameEngineErrors.h>
 #include <GameEngine/ResourceManager.h>
 #include <GameEngine/Vertex.h>
 

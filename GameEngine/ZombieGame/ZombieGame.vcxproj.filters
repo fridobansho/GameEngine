@@ -22,6 +22,18 @@
     <Filter Include="Levels">
       <UniqueIdentifier>{e8b782d4-aa90-4349-93eb-54ba8312e8d4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Audio">
+      <UniqueIdentifier>{840d90e0-82d8-4170-b11e-d78e8e917a01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Audio\Music">
+      <UniqueIdentifier>{77845746-d2e8-48ab-a706-162af87c3fbc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Audio\Sounds">
+      <UniqueIdentifier>{1a2e0544-a8be-4eff-ab6f-81175dd2a87d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Audio\Sounds\shots">
+      <UniqueIdentifier>{391b154a-032a-455a-8502-7f60b9f9f1d1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -86,6 +98,30 @@
     <None Include="Shaders\colourShading.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Audio\Music\XYZ_0.ogg">
+      <Filter>Audio\Music</Filter>
+    </None>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\SDL2_mixer.dll">
+      <Filter>Resource Files</Filter>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\libFLAC-8.dll">
+      <Filter>Resource Files</Filter>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\libmodplug-1.dll">
+      <Filter>Resource Files</Filter>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\libogg-0.dll">
+      <Filter>Resource Files</Filter>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\libvorbis-0.dll">
+      <Filter>Resource Files</Filter>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\libvorbisfile-3.dll">
+      <Filter>Resource Files</Filter>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\smpeg2.dll">
+      <Filter>Resource Files</Filter>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Textures\circle.png">
@@ -105,5 +141,19 @@
     <Text Include="Levels\level1.txt">
       <Filter>Levels</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Audio\Sounds\shots\cg1.wav">
+      <Filter>Audio\Sounds\shots</Filter>
+    </Media>
+    <Media Include="Audio\Sounds\shots\pistol.wav">
+      <Filter>Audio\Sounds\shots</Filter>
+    </Media>
+    <Media Include="Audio\Sounds\shots\rifle.wav">
+      <Filter>Audio\Sounds\shots</Filter>
+    </Media>
+    <Media Include="Audio\Sounds\shots\shotgun.wav">
+      <Filter>Audio\Sounds\shots</Filter>
+    </Media>
   </ItemGroup>
 </Project>

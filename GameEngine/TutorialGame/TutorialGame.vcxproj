@@ -20,6 +20,27 @@
     <ClInclude Include="MainGame.h" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\SDL2_mixer.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\libFLAC-8.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\libmodplug-1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\libogg-0.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\libvorbis-0.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\libvorbisfile-3.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\smpeg2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
     <None Include="Shaders\colourShading.frag" />
     <None Include="Shaders\colourShading.vert" />
@@ -58,13 +79,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\packages\sdl2_ttf.v140.2.0.14\build\native\include;..\packages\glew.1.9.0.1\build\native\include;..\packages\sdl2.2.0.3\build\native\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\packages\sdl2_ttf.v140.2.0.14\build\native\lib\Win32\Debug;..\packages\glew.1.9.0.1\build\native\lib\v110\Win32\Debug\dynamic;..\packages\sdl2.2.0.3\build\native\lib\Win32\dynamic;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\packages\SDL2_mixer-2.0.1\include;..\packages\sdl2_mixer.2.0.0\content;..\packages\sdl2_ttf.v140.2.0.14\build\native\include;..\packages\glew.1.9.0.1\build\native\include;..\packages\sdl2.2.0.3\build\native\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\packages\SDL2_mixer-2.0.1\lib\x86;..\packages\sdl2_ttf.v140.2.0.14\build\native\lib\Win32\Debug;..\packages\glew.1.9.0.1\build\native\lib\v110\Win32\Debug\dynamic;..\packages\sdl2.2.0.3\build\native\lib\Win32\dynamic;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\packages\sdl2_ttf.v140.2.0.14\build\native\include;..\packages\glew.1.9.0.1\build\native\include;..\packages\sdl2.2.0.3\build\native\include;$(IncludePath)</IncludePath>
-    <LibraryPath>..\packages\sdl2_ttf.v140.2.0.14\build\native\lib\Win32\Release;..\packages\glew.1.9.0.1\build\native\lib\v110\Win32\Release\dynamic;..\packages\sdl2.2.0.3\build\native\lib\Win32\dynamic;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\packages\SDL2_mixer-2.0.1\include;..\packages\sdl2_mixer.2.0.0\content;..\packages\sdl2_ttf.v140.2.0.14\build\native\include;..\packages\glew.1.9.0.1\build\native\include;..\packages\sdl2.2.0.3\build\native\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\packages\SDL2_mixer-2.0.1\lib\x86;..\packages\sdl2_ttf.v140.2.0.14\build\native\lib\Win32\Release;..\packages\glew.1.9.0.1\build\native\lib\v110\Win32\Release\dynamic;..\packages\sdl2.2.0.3\build\native\lib\Win32\dynamic;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -79,7 +100,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glew.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;opengl32.lib;$(TargetDir)\GameEngine.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_mixer.lib;opengl32.lib;$(TargetDir)\GameEngine.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -99,7 +121,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glew.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;opengl32.lib;$(TargetDir)\GameEngine.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glew.lib;SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_mixer.lib;opengl32.lib;$(TargetDir)\GameEngine.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

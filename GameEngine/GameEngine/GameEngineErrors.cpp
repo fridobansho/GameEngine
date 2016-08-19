@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include <cstdlib>
 
-#include "Errors.h"
+#include "GameEngineErrors.h"
 
 namespace GameEngine {
 	void FatalError(std::string errorString)

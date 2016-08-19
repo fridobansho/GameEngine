@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "GLSLProgram.h"
-#include "Errors.h"
+#include "GameEngineErrors.h"
 
 namespace GameEngine {
 	GLSLProgram::GLSLProgram() : m_programId(0), m_vertexShaderId(0), m_fragmentShaderId(0), m_numAttributes(0)
