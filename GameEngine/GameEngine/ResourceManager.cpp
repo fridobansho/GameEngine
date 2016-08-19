@@ -1,10 +1,10 @@
 #include "ResourceManager.h"
 
 namespace GameEngine {
-	TextureCache ResourceManager::_textureCache;
+	TextureCache ResourceManager::m_textureCache;
 
 	GLTexture ResourceManager::GetTexture(const std::string & texturePath)
 	{
-		return _textureCache.GetTexture(texturePath);
+		return m_textureCache.GetTexture(texturePath);
 	}
 }

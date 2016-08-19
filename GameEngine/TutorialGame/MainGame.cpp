@@ -12,13 +12,13 @@
 using namespace GameEngine;
 
 MainGame::MainGame() :
-	_screenWidth(1024),
-	_screenHeight(768),
-	_gameState(GameState::PLAY),
+	m_screenWidth(1024),
+	m_screenHeight(768),
+	m_gameState(GameState::PLAY),
 	_time(0.0f),
-	_maxFPS(60.0f)
+	m_maxFPS(60.0f)
 {
-	_camera.Init(_screenWidth, _screenHeight);
+	m_camera.Init(m_screenWidth, m_screenHeight);
 }
 
 MainGame::~MainGame()
@@ -36,40 +36,40 @@ void MainGame::InitSystems()
 {
 	GameEngine::Init();
 
-	_window.Create("Game Engine", _screenWidth, _screenHeight, 0);
+	m_window.Create("Game Engine", m_screenWidth, m_screenHeight, 0);
 
 	InitShaders();
 
-	_spriteBatch.init();
+	m_spriteBatch.init();
 
-	_fpsLimiter.init(_maxFPS);
+	m_fpsLimiter.init(m_maxFPS);
 }
 
 void MainGame::InitShaders()
 {
-	_colourProgram.CompileShaders("Shaders\\colourShading.vert", "Shaders\\colourShading.frag");
-	_colourProgram.AddAttribute("vertexPosition");
-	_colourProgram.AddAttribute("vertexColour");
-	_colourProgram.AddAttribute("vertexUV");
-	_colourProgram.LinkShaders();
+	m_colourProgram.CompileShaders("Shaders\\colourShading.vert", "Shaders\\colourShading.frag");
+	m_colourProgram.AddAttribute("vertexPosition");
+	m_colourProgram.AddAttribute("vertexColour");
+	m_colourProgram.AddAttribute("vertexUV");
+	m_colourProgram.LinkShaders();
 }
 
 void MainGame::GameLoop()
 {
-	while (_gameState != GameState::EXIT)
+	while (m_gameState != GameState::EXIT)
 	{
-		_fpsLimiter.begin();
+		m_fpsLimiter.begin();
 		ProcessInput();
 		_time += 0.01f;
 
-		_camera.Update();
+		m_camera.Update();
 
-		for (int i = 0; i < _bullets.size();)
+		for (int i = 0; i < m_bullets.size();)
 		{
-			if (_bullets[i].update())
+			if (m_bullets[i].update())
 			{
-				_bullets[i] = _bullets.back();
-				_bullets.pop_back();
+				m_bullets[i] = m_bullets.back();
+				m_bullets.pop_back();
 			}
 			else
 				i++;
@@ -77,7 +77,7 @@ void MainGame::GameLoop()
 
 		DrawGame();
 
-		_fps = _fpsLimiter.end();
+		m_fps = m_fpsLimiter.end();
 
 		static int frameCounter = 0;
 		frameCounter++;
@@ -85,7 +85,7 @@ void MainGame::GameLoop()
 		if (frameCounter == 10000)
 		{
 			frameCounter = 0;
-			std::cout << _fps << std::endl;
+			std::cout << m_fps << std::endl;
 		}
 	}
 }
@@ -102,48 +102,48 @@ void MainGame::ProcessInput()
 		switch (event.type)
 		{
 		case SDL_QUIT:
-			_gameState = GameState::EXIT;
+			m_gameState = GameState::EXIT;
 			break;
 		case SDL_MOUSEMOTION:
-			_inputManager.setMouseCoords(event.motion.x, event.motion.y);
+			m_inputManager.setMouseCoords(event.motion.x, event.motion.y);
 			break;
 		case SDL_KEYDOWN:
-			_inputManager.pressKey(event.key.keysym.sym);
+			m_inputManager.pressKey(event.key.keysym.sym);
 			break;
 		case SDL_KEYUP:
-			_inputManager.releaseKey(event.key.keysym.sym);
+			m_inputManager.releaseKey(event.key.keysym.sym);
 			break;
 		case SDL_MOUSEBUTTONDOWN:
-			_inputManager.pressKey(event.button.button);
+			m_inputManager.pressKey(event.button.button);
 			break;
 		case SDL_MOUSEBUTTONUP:
-			_inputManager.releaseKey(event.button.button);
+			m_inputManager.releaseKey(event.button.button);
 			break;
 		}
 	}
 
-	if(_inputManager.isKeyDown(SDLK_w))
-		_camera.SetPosition(_camera.GetPosition() + glm::vec2(0.0f, CAMERA_SPEED));
+	if(m_inputManager.isKeyDown(SDLK_w))
+		m_camera.SetPosition(m_camera.GetPosition() + glm::vec2(0.0f, CAMERA_SPEED));
 
-	if (_inputManager.isKeyDown(SDLK_s))
-		_camera.SetPosition(_camera.GetPosition() + glm::vec2(0.0f, -CAMERA_SPEED));
+	if (m_inputManager.isKeyDown(SDLK_s))
+		m_camera.SetPosition(m_camera.GetPosition() + glm::vec2(0.0f, -CAMERA_SPEED));
 
-	if (_inputManager.isKeyDown(SDLK_a))
-		_camera.SetPosition(_camera.GetPosition() + glm::vec2(-CAMERA_SPEED, 0.0f));
+	if (m_inputManager.isKeyDown(SDLK_a))
+		m_camera.SetPosition(m_camera.GetPosition() + glm::vec2(-CAMERA_SPEED, 0.0f));
 
-	if (_inputManager.isKeyDown(SDLK_d))
-		_camera.SetPosition(_camera.GetPosition() + glm::vec2(CAMERA_SPEED, 0.0f));
+	if (m_inputManager.isKeyDown(SDLK_d))
+		m_camera.SetPosition(m_camera.GetPosition() + glm::vec2(CAMERA_SPEED, 0.0f));
 
-	if (_inputManager.isKeyDown(SDLK_q))
-		_camera.SetScale(_camera.GetScale() + SCALE_SPEED);
+	if (m_inputManager.isKeyDown(SDLK_q))
+		m_camera.SetScale(m_camera.GetScale() + SCALE_SPEED);
 
-	if (_inputManager.isKeyDown(SDLK_e))
-		_camera.SetScale(_camera.GetScale() - SCALE_SPEED);
+	if (m_inputManager.isKeyDown(SDLK_e))
+		m_camera.SetScale(m_camera.GetScale() - SCALE_SPEED);
 
-	if (_inputManager.isKeyDown(SDL_BUTTON_LEFT))
+	if (m_inputManager.isKeyDown(SDL_BUTTON_LEFT))
 	{
-		glm::vec2 mouseCoords = _inputManager.getMouseCoords();
-		mouseCoords = _camera.convertScreenToWorld(mouseCoords);
+		glm::vec2 mouseCoords = m_inputManager.getMouseCoords();
+		mouseCoords = m_camera.convertScreenToWorld(mouseCoords);
 
 		glm::vec2 playerPosition(0.0f);
 
@@ -151,7 +151,7 @@ void MainGame::ProcessInput()
 
 		direction = glm::normalize(direction);
 
-		_bullets.emplace_back(playerPosition, direction, 5.00f, 1000);
+		m_bullets.emplace_back(playerPosition, direction, 5.00f, 1000);
 	}
 }
 
@@ -160,19 +160,19 @@ void MainGame::DrawGame()
 	glClearDepth(1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	_colourProgram.Use();
+	m_colourProgram.Use();
 
 	glActiveTexture(GL_TEXTURE0);
-	GLint textureLocation = _colourProgram.GetUniformLocation("mySampler");
+	GLint textureLocation = m_colourProgram.GetUniformLocation("mySampler");
 	glUniform1i(textureLocation, 0);
 
-	GLint pLocation = _colourProgram.GetUniformLocation("P");
+	GLint pLocation = m_colourProgram.GetUniformLocation("P");
 
-	glm::mat4 cameraMatrix = _camera.getCameraMatrix();
+	glm::mat4 cameraMatrix = m_camera.getCameraMatrix();
 
 	glUniformMatrix4fv(pLocation, 1, GL_FALSE, &(cameraMatrix[0][0]));
 
-	_spriteBatch.begin();
+	m_spriteBatch.begin();
 
 	glm::vec4 position(0.0f, 0.0f, 50.0f, 50.0f);
 	glm::vec4 uv(0.0f, 0.0f, 1.0f, 1.0f);
@@ -180,20 +180,20 @@ void MainGame::DrawGame()
 	static GLTexture texture = ResourceManager::GetTexture("Textures/jimmyJump_pack/PNG/CharacterRight_Standing.png");
 	ColourRGBA8 colour(255, 255, 255, 255);
 
-	_spriteBatch.draw(position, uv, texture.id, 0.0f, colour);
+	m_spriteBatch.draw(position, uv, texture.id, 0.0f, colour);
 
-	for (int i = 0; i < _bullets.size(); i++)
+	for (int i = 0; i < m_bullets.size(); i++)
 	{
-		_bullets[i].draw(_spriteBatch);
+		m_bullets[i].draw(m_spriteBatch);
 	}
 
-	_spriteBatch.end();
+	m_spriteBatch.end();
 
-	_spriteBatch.renderBatch();
+	m_spriteBatch.renderBatch();
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	_colourProgram.UnUse();
+	m_colourProgram.UnUse();
 
-	_window.Swap();
+	m_window.Swap();
 }

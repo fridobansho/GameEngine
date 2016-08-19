@@ -15,12 +15,12 @@ namespace GameEngine {
 
 	GLTexture TextureCache::GetTexture(const std::string & texturePath)
 	{
-		auto mit = _textureMap.find(texturePath);
+		auto mit = m_textureMap.find(texturePath);
 
-		if (mit == _textureMap.end())
+		if (mit == m_textureMap.end())
 		{
 			GLTexture newTexture = ImageLoader::LoadPNG(texturePath);
-			_textureMap.insert(make_pair(texturePath, newTexture));
+			m_textureMap.insert(make_pair(texturePath, newTexture));
 			return newTexture;
 		}
 

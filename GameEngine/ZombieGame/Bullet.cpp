@@ -5,10 +5,10 @@
 #include "Level.h"
 
 Bullet::Bullet(glm::vec2 position, glm::vec2 direction, float damage, float speed) :
-	_position(position),
-	_direction(direction),
-	_damage(damage),
-	_speed(speed)
+	m_position(position),
+	m_direction(direction),
+	m_damage(damage),
+	m_speed(speed)
 {
 }
 
@@ -18,15 +18,15 @@ Bullet::~Bullet()
 
 bool Bullet::update(const std::vector<std::string>& levelData, float deltaTime)
 {
-	_position += _direction * _speed  * deltaTime;
+	m_position += m_direction * m_speed  * deltaTime;
 	return collideWithWorld(levelData);
 }
 
 
 void Bullet::draw(GameEngine::SpriteBatch& spriteBatch)
 {
-	glm::vec4 destRect(_position.x + BULLET_RADIUS,
-		_position.y + BULLET_RADIUS,
+	glm::vec4 destRect(m_position.x + BULLET_RADIUS,
+		m_position.y + BULLET_RADIUS,
 		BULLET_RADIUS * 2,
 		BULLET_RADIUS * 2);
 
@@ -41,7 +41,7 @@ bool Bullet::collideWithAgent(Agent* agent)
 {
 	const float MIN_DISTANCE = AGENT_RADIUS + BULLET_RADIUS;
 
-	glm::vec2 centerPosA = _position;
+	glm::vec2 centerPosA = m_position;
 	glm::vec2 centerPosB = agent->getPosition() + glm::vec2(AGENT_RADIUS);
 
 	glm::vec2 distVec = centerPosA - centerPosB;
@@ -60,8 +60,8 @@ bool Bullet::collideWithAgent(Agent* agent)
 bool Bullet::collideWithWorld(const std::vector<std::string>& levelData)
 {
 	glm::ivec2 gridPosition;
-	gridPosition.x = floor(_position.x / TILE_WIDTH);
-	gridPosition.y = floor(_position.y / TILE_WIDTH);
+	gridPosition.x = floor(m_position.x / TILE_WIDTH);
+	gridPosition.y = floor(m_position.y / TILE_WIDTH);
 
 	if ((gridPosition.x < 0 || gridPosition.x >= levelData[0].size()) || (gridPosition.y < 0 || gridPosition.y >= levelData.size()))
 		return true;

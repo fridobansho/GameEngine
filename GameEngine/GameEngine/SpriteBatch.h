@@ -51,10 +51,10 @@ namespace GameEngine
 	class RenderBatch
 	{
 	public:
-		RenderBatch(GLuint offset, GLuint numVertices, GLuint texture) :_offset(offset), _numVertices(numVertices), _texture(texture) {}
-		GLuint _offset;
-		GLuint _numVertices;
-		GLuint _texture;
+		RenderBatch(GLuint offset, GLuint numVertices, GLuint texture) :m_offset(offset), m_numVertices(numVertices), m_texture(texture) {}
+		GLuint m_offset;
+		GLuint m_numVertices;
+		GLuint m_texture;
 	private:
 
 	};
@@ -82,14 +82,14 @@ namespace GameEngine
 		static bool compareBackToFront(Glyph* a, Glyph* b);
 		static bool compareTexture(Glyph* a, Glyph* b);
 
-		GLuint _vbo;
-		GLuint _vao;
+		GLuint m_vbo = 0;
+		GLuint m_vao = 0;
 
-		GlyphSortType _sortType;
+		GlyphSortType m_sortType = GlyphSortType::TEXTURE;
 
-		std::vector<Glyph*> _glyphPointers;
-		std::vector<Glyph> _glyphs;
-		std::vector<RenderBatch> _renderBatches;
+		std::vector<Glyph*> m_glyphPointers;
+		std::vector<Glyph> m_glyphs;
+		std::vector<RenderBatch> m_renderBatches;
 	};
 }
 

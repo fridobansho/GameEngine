@@ -21,13 +21,13 @@ namespace GameEngine {
 
 		void Swap();
 
-		int GetScreenWidth() { return _screenWidth; }
-		int GetScreenHeight() { return _screenHeight; }
+		int GetScreenWidth() { return m_screenWidth; }
+		int GetScreenHeight() { return m_screenHeight; }
 
 	private:
-		SDL_Window* _sdlWindow;
-		int _screenWidth;
-		int _screenHeight;
+		SDL_Window* m_sdlWindow;
+		int m_screenWidth = 0;
+		int m_screenHeight = 0;
 	};
 
 }

@@ -9,7 +9,7 @@ namespace GameEngine {
 		static GLTexture GetTexture(const std::string&);
 
 	private:
-		static TextureCache _textureCache;
+		static TextureCache m_textureCache;
 	};
 
 }

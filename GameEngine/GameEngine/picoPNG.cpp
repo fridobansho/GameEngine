@@ -6,8 +6,8 @@ namespace GameEngine {
 	out_image: output parameter, this will contain the raw pixels after decoding.
 	  By default the output is 32-bit RGBA color.
 	  The std::vector is automatically resized to the correct size.
-	image_width: output_parameter, this will contain the width of the image in pixels.
-	image_height: output_parameter, this will contain the height of the image in pixels.
+	imagem_width: output_parameter, this will contain the width of the image in pixels.
+	imagem_height: output_parameter, this will contain the height of the image in pixels.
 	in_png: pointer to the buffer of the PNG file in memory. To get it from a file on
 	  disk, load it and store it in a memory buffer yourself first.
 	in_size: size of the input PNG file in bytes.
@@ -22,7 +22,7 @@ namespace GameEngine {
 	  works for trusted PNG files. Use LodePNG instead of picoPNG if you need this information.
 	return: 0 if success, not 0 if some error occured.
 	*/
-	int decodePNG(std::vector<unsigned char>& out_image, unsigned long& image_width, unsigned long& image_height, const unsigned char* in_png, size_t in_size, bool convert_to_rgba32)
+	int decodePNG(std::vector<unsigned char>& out_image, unsigned long& imagem_width, unsigned long& imagem_height, const unsigned char* in_png, size_t in_size, bool convert_to_rgba32)
 	{
 		// picoPNG version 20101224
 		// Copyright (c) 2005-2010 Lode Vandevenne
@@ -529,7 +529,7 @@ namespace GameEngine {
 			}
 		};
 		PNG decoder; decoder.decode(out_image, in_png, in_size, convert_to_rgba32);
-		image_width = decoder.info.width; image_height = decoder.info.height;
+		imagem_width = decoder.info.width; imagem_height = decoder.info.height;
 		return decoder.error;
 	}
 }

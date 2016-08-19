@@ -5,7 +5,7 @@
 #include "Errors.h"
 
 namespace GameEngine {
-	GLSLProgram::GLSLProgram() : _programId(0), _vertexShaderId(0), _fragmentShaderId(0), _numAttributes(0)
+	GLSLProgram::GLSLProgram() : m_programId(0), m_vertexShaderId(0), m_fragmentShaderId(0), m_numAttributes(0)
 	{
 	}
 
@@ -15,64 +15,64 @@ namespace GameEngine {
 
 	void GLSLProgram::CompileShaders(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath)
 	{
-		_vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
+		m_vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
 
-		if (_vertexShaderId == 0)
+		if (m_vertexShaderId == 0)
 		{
 			FatalError("Vertex shader failed to be created.");
 		}
 
-		_fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
+		m_fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
 
-		if (_fragmentShaderId == 0)
+		if (m_fragmentShaderId == 0)
 		{
 			FatalError("Fragment shader failed to be created.");
 		}
 
-		CompileShader(vertexShaderFilePath, _vertexShaderId);
-		CompileShader(fragmentShaderFilePath, _fragmentShaderId);
+		CompileShader(vertexShaderFilePath, m_vertexShaderId);
+		CompileShader(fragmentShaderFilePath, m_fragmentShaderId);
 	}
 
 	void GLSLProgram::LinkShaders()
 	{
-		glAttachShader(_programId, _vertexShaderId);
-		glAttachShader(_programId, _fragmentShaderId);
+		glAttachShader(m_programId, m_vertexShaderId);
+		glAttachShader(m_programId, m_fragmentShaderId);
 
-		glLinkProgram(_programId);
+		glLinkProgram(m_programId);
 
 		GLint isLinked = 0;
-		glGetProgramiv(_programId, GL_LINK_STATUS, &isLinked);
+		glGetProgramiv(m_programId, GL_LINK_STATUS, &isLinked);
 		if (isLinked == GL_FALSE)
 		{
 			GLint maxLength = 0;
-			glGetProgramiv(_programId, GL_INFO_LOG_LENGTH, &maxLength);
+			glGetProgramiv(m_programId, GL_INFO_LOG_LENGTH, &maxLength);
 
 			std::vector<char> errorLog(maxLength);
-			glGetProgramInfoLog(_programId, maxLength, &maxLength, &errorLog[0]);
+			glGetProgramInfoLog(m_programId, maxLength, &maxLength, &errorLog[0]);
 
-			glDeleteProgram(_programId);
+			glDeleteProgram(m_programId);
 
-			glDeleteShader(_vertexShaderId);
-			glDeleteShader(_fragmentShaderId);
+			glDeleteShader(m_vertexShaderId);
+			glDeleteShader(m_fragmentShaderId);
 
 			std::printf("%s\n", &(errorLog[0]));
 			FatalError("Shaders failed to compile");
 		}
 
-		glDetachShader(_programId, _vertexShaderId);
-		glDetachShader(_programId, _fragmentShaderId);
-		glDeleteShader(_vertexShaderId);
-		glDeleteShader(_fragmentShaderId);
+		glDetachShader(m_programId, m_vertexShaderId);
+		glDetachShader(m_programId, m_fragmentShaderId);
+		glDeleteShader(m_vertexShaderId);
+		glDeleteShader(m_fragmentShaderId);
 	}
 
 	void GLSLProgram::AddAttribute(const std::string & attributeName)
 	{
-		glBindAttribLocation(_programId, _numAttributes++, attributeName.c_str());
+		glBindAttribLocation(m_programId, m_numAttributes++, attributeName.c_str());
 	}
 
 	GLint GLSLProgram::GetUniformLocation(const std::string & uniformName)
 	{
-		GLint location = glGetUniformLocation(_programId, uniformName.c_str());
+		GLint location = glGetUniformLocation(m_programId, uniformName.c_str());
 		if (location == GL_INVALID_INDEX)
 		{
 			FatalError("Uniform " + uniformName + " not found in shader.");
@@ -82,9 +82,9 @@ namespace GameEngine {
 
 	void GLSLProgram::Use()
 	{
-		glUseProgram(_programId);
+		glUseProgram(m_programId);
 
-		for (int i = 0; i < _numAttributes; i++)
+		for (int i = 0; i < m_numAttributes; i++)
 		{
 			glEnableVertexAttribArray(i);
 		}
@@ -93,7 +93,7 @@ namespace GameEngine {
 	void GLSLProgram::UnUse()
 	{
 		glUseProgram(0);
-		for (int i = 0; i < _numAttributes; i++)
+		for (int i = 0; i < m_numAttributes; i++)
 		{
 			glDisableVertexAttribArray(i);
 		}
@@ -101,7 +101,7 @@ namespace GameEngine {
 
 	void GLSLProgram::CompileShader(const std::string & filePath, GLuint id)
 	{
-		_programId = glCreateProgram();
+		m_programId = glCreateProgram();
 
 		std::ifstream vertexFile(filePath);
 

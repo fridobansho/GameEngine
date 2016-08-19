@@ -36,20 +36,20 @@ private:
 	void DrawGame();
 	void GameLoop();
 
-	GameEngine::Window _window;
-	int _screenWidth;
-	int _screenHeight;
-	GameState _gameState;
-	GameEngine::GLSLProgram _colourProgram;
-	GameEngine::Camera2D _camera;
-	GameEngine::SpriteBatch _spriteBatch;
-	GameEngine::InputManager _inputManager;
-	GameEngine::FPSLimiter _fpsLimiter;
+	GameEngine::Window m_window;
+	int m_screenWidth;
+	int m_screenHeight;
+	GameState m_gameState;
+	GameEngine::GLSLProgram m_colourProgram;
+	GameEngine::Camera2D m_camera;
+	GameEngine::SpriteBatch m_spriteBatch;
+	GameEngine::InputManager m_inputManager;
+	GameEngine::FPSLimiter m_fpsLimiter;
 
-	std::vector<Bullet> _bullets;
+	std::vector<Bullet> m_bullets;
 
-	float _maxFPS;
-	float _fps;
+	float m_maxFPS;
+	float m_fps;
 	float _time;
 };
 

@@ -5,30 +5,30 @@
 #include "ResourceManager.h"
 
 namespace GameEngine {
-	Sprite::Sprite() : _vboID(0)
+	Sprite::Sprite() : m_vboID(0)
 	{
 	}
 
 	Sprite::~Sprite()
 	{
-		if (_vboID != 0)
+		if (m_vboID != 0)
 		{
-			glDeleteBuffers(1, &_vboID);
+			glDeleteBuffers(1, &m_vboID);
 		}
 	}
 
 	void Sprite::Init(float x, float y, float width, float height, const std::string & texturePath)
 	{
-		_x = x;
-		_y = y;
-		_width = width;
-		_height = height;
+		m_x = x;
+		m_y = y;
+		m_width = width;
+		m_height = height;
 
-		_texture = ResourceManager::GetTexture(texturePath);
+		m_texture = ResourceManager::GetTexture(texturePath);
 
-		if (_vboID == 0)
+		if (m_vboID == 0)
 		{
-			glGenBuffers(1, &_vboID);
+			glGenBuffers(1, &m_vboID);
 		}
 
 		Vertex vertexData[6];
@@ -62,16 +62,16 @@ namespace GameEngine {
 
 		vertexData[4].setColour(0, 255, 0, 255);
 
-		glBindBuffer(GL_ARRAY_BUFFER, _vboID);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vboID);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	void Sprite::Draw()
 	{
-		glBindTexture(GL_TEXTURE_2D, _texture.id);
+		glBindTexture(GL_TEXTURE_2D, m_texture.id);
 
-		glBindBuffer(GL_ARRAY_BUFFER, _vboID);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vboID);
 
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);

@@ -17,21 +17,21 @@ namespace GameEngine
 
 		glm::vec2 convertScreenToWorld(glm::vec2 screenCoords);
 
-		void SetPosition(const glm::vec2& newPosition) { _position = newPosition; _needsMatrixUpdate = true;	}
-		void SetScale(float newScale) { _scale = newScale; _needsMatrixUpdate = true; }
+		void SetPosition(const glm::vec2& newPosition) { m_position = newPosition; m_needsMatrixUpdate = true;	}
+		void SetScale(float newScale) { m_scale = newScale; m_needsMatrixUpdate = true; }
 
-		glm::vec2 & GetPosition() { return _position; }
-		float GetScale() { return _scale; }
-		glm::mat4 getCameraMatrix() { return _cameraMatrix; }
+		glm::vec2 & GetPosition() { return m_position; }
+		float GetScale() { return m_scale; }
+		glm::mat4 getCameraMatrix() { return m_cameraMatrix; }
 
 	private:
-		int _screenWidth;
-		int _screenHeight;
-		bool _needsMatrixUpdate;
-		float _scale;
-		glm::vec2 _position;
-		glm::mat4 _cameraMatrix;
-		glm::mat4 _orthoMatrix;
+		int m_screenWidth = 500;
+		int m_screenHeight = 500;
+		bool m_needsMatrixUpdate = true;
+		float m_scale = 1.0f;
+		glm::vec2 m_position = glm::vec2(0.0f, 0.0f);
+		glm::mat4 m_cameraMatrix = glm::mat4(1.0f);
+		glm::mat4 m_orthoMatrix = glm::mat4(1.0f);
 	};
 
 }

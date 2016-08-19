@@ -54,38 +54,38 @@ private:
 	void drawHud();
 
     /// Member Variables
-    GameEngine::Window _window; ///< The game window
+    GameEngine::Window m_window; ///< The game window
 
 
-	GameEngine::GLSLProgram _colourProgram;
+	GameEngine::GLSLProgram m_colourProgram;
 
 
-    GameEngine::InputManager _inputManager; ///< Handles input
+    GameEngine::InputManager m_inputManager; ///< Handles input
 
-    GameEngine::Camera2D _camera; ///< Main Camera
-	GameEngine::Camera2D _hudCamera;
-	GameEngine::SpriteBatch _agentSpriteBatch;
-	GameEngine::SpriteBatch _hudSpriteBatch;
-	std::vector<Level*> _levels;
+    GameEngine::Camera2D m_camera; ///< Main Camera
+	GameEngine::Camera2D m_hudCamera;
+	GameEngine::SpriteBatch m_agentSpriteBatch;
+	GameEngine::SpriteBatch m_hudSpriteBatch;
+	std::vector<Level*> m_levels;
 
-	int _screenWidth;
-	int _screenHeight;
+	int m_screenWidth;
+	int m_screenHeight;
 
-	GameState _gameState;
+	GameState m_gameState;
 
-	float _fps;
+	float m_fps;
 
-	int _currentLevel;
+	int m_currentLevel;
 
-	std::vector<Human*> _humans;
-	std::vector<Zombie*> _zombies;
-	std::vector<Bullet> _bullets;
+	std::vector<Human*> m_humans;
+	std::vector<Zombie*> m_zombies;
+	std::vector<Bullet> m_bullets;
 
-	Player* _player;
+	Player* m_player;
 
-	int _numHumansKilled;
-	int _numZombiesKilled;
+	int m_numHumansKilled;
+	int m_numZombiesKilled;
 
-	GameEngine::SpriteFont* _spriteFont;
+	GameEngine::SpriteFont* m_spriteFont;
 };
 

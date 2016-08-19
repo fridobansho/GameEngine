@@ -17,60 +17,60 @@ Level::Level(const string & fileName)
 	}
 
 	string tmp;
-	file >> tmp >> _numHumans;
+	file >> tmp >> m_numHumans;
 
 	getline(file, tmp);
 
 	while (getline(file, tmp))
 	{
-		_levelData.push_back(tmp);
+		m_levelData.push_back(tmp);
 	}
 
-	_spriteBatch.init();
+	m_spriteBatch.init();
 
-	_spriteBatch.begin();
+	m_spriteBatch.begin();
 
 	glm::vec4 uvRect(0.0f, 0.0f, 1.0f, 1.0f);
 	GameEngine::ColourRGBA8 whiteColour(255, 255, 255, 255);
 
-	for (int y = 0; y < _levelData.size(); y++)
+	for (int y = 0; y < m_levelData.size(); y++)
 	{
-		for (int x = 0; x < _levelData[y].size(); x++)
+		for (int x = 0; x < m_levelData[y].size(); x++)
 		{
-			char tile = _levelData[y][x];
+			char tile = m_levelData[y][x];
 			glm::vec4 destRect(x * TILE_WIDTH, y * TILE_WIDTH, TILE_WIDTH, TILE_WIDTH);
 			switch (tile)
 			{
 			case '@':
-				_levelData[y][x] = '.';
-				_startPlayerPosition.x = x * TILE_WIDTH;
-				_startPlayerPosition.y = y * TILE_WIDTH;
+				m_levelData[y][x] = '.';
+				m_startPlayerPosition.x = x * TILE_WIDTH;
+				m_startPlayerPosition.y = y * TILE_WIDTH;
 				break;
 			case 'R':
 			case 'B':
-				_spriteBatch.draw(destRect,
+				m_spriteBatch.draw(destRect,
 					uvRect,
 					GameEngine::ResourceManager::GetTexture("Textures/red_bricks.png").id,
 					0.0f,
 					whiteColour);
 				break;
 			case 'L':
-				_spriteBatch.draw(destRect,
+				m_spriteBatch.draw(destRect,
 					uvRect,
 					GameEngine::ResourceManager::GetTexture("Textures/light_bricks.png").id,
 					0.0f,
 					whiteColour);
 				break;
 			case 'G':
-				_spriteBatch.draw(destRect,
+				m_spriteBatch.draw(destRect,
 					uvRect,
 					GameEngine::ResourceManager::GetTexture("Textures/glass.png").id,
 					0.0f,
 					whiteColour);
 				break;
 			case 'Z':
-				_levelData[y][x] = '.';
-				_zombieStartPositions.emplace_back(x * TILE_WIDTH, y * TILE_WIDTH);
+				m_levelData[y][x] = '.';
+				m_zombieStartPositions.emplace_back(x * TILE_WIDTH, y * TILE_WIDTH);
 				break;
 			case '.':
 				break;
@@ -81,7 +81,7 @@ Level::Level(const string & fileName)
 		}
 	}
 
-	_spriteBatch.end();
+	m_spriteBatch.end();
 }
 
 Level::~Level()
@@ -90,5 +90,5 @@ Level::~Level()
 
 void Level::draw()
 {
-	_spriteBatch.renderBatch();
+	m_spriteBatch.renderBatch();
 }

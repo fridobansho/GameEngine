@@ -4,9 +4,9 @@
 
 Bullet::Bullet(glm::vec2 position, glm::vec2 direction, float speed, int lifeTime)
 {
-	_position = position;
-	_direction = direction;
-	_speed = speed;
+	m_position = position;
+	m_direction = direction;
+	m_speed = speed;
 	_lifeTime = lifeTime;
 }
 
@@ -21,14 +21,14 @@ void Bullet::draw(SpriteBatch & spriteBatch)
 	glm::vec4 uv(0.0f, 0.0f, 1.0f, 1.0f);
 	static GLTexture texture = ResourceManager::GetTexture("Textures/jimmyJump_pack/PNG/CharacterRight_Standing.png");
 
-	glm::vec4 posAndSize(_position.x, _position.y, 30, 30);
+	glm::vec4 posAndSize(m_position.x, m_position.y, 30, 30);
 
 	spriteBatch.draw(posAndSize, uv, texture.id, 0.0f, colour);
 }
 
 bool Bullet::update()
 {
-	_position += _direction * _speed;
+	m_position += m_direction * m_speed;
 	_lifeTime--;
 
 	if (_lifeTime == 0)

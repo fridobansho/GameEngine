@@ -30,17 +30,17 @@ public:
 
 	void draw(GameEngine::SpriteBatch& spriteBatch);
 
-	glm::vec2 getPosition() const { return _position; }
+	glm::vec2 getPosition() const { return m_position; }
 
 	bool applyDamage(float damage);
 
 protected:
 	void checkTilePosition(const std::vector<std::string>& levelData, std::vector<glm::vec2>& collideTilePositions, float x, float y);
 
-	glm::vec2 _position;
-	float _speed;
-	GameEngine::ColourRGBA8 _colour;
+	glm::vec2 m_position = glm::vec2(0.0f);
+	float m_speed = 0.0f;
+	GameEngine::ColourRGBA8 m_colour;
 
-	float _health;
+	float m_health = 0.0f;
 };
 

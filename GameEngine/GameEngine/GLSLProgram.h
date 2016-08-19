@@ -20,11 +20,11 @@ namespace GameEngine {
 	private:
 		void CompileShader(const std::string&, GLuint);
 
-		int _numAttributes;
+		int m_numAttributes = 0;
 
-		GLuint _programId;
-		GLuint _vertexShaderId;
-		GLuint _fragmentShaderId;
+		GLuint m_programId = 0;
+		GLuint m_vertexShaderId = 0;
+		GLuint m_fragmentShaderId = 0;
 	};
 }
 

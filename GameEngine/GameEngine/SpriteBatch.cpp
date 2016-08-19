@@ -4,7 +4,7 @@
 
 using namespace GameEngine;
 
-SpriteBatch::SpriteBatch() : _vbo(0), _vao(0)
+SpriteBatch::SpriteBatch() : m_vbo(0), m_vao(0)
 {
 }
 
@@ -19,17 +19,17 @@ void GameEngine::SpriteBatch::init()
 
 void GameEngine::SpriteBatch::begin(GlyphSortType sortType)
 {
-	_sortType = sortType;
-	_renderBatches.clear();
-	_glyphs.clear();
+	m_sortType = sortType;
+	m_renderBatches.clear();
+	m_glyphs.clear();
 }
 
 void GameEngine::SpriteBatch::end()
 {
-	_glyphPointers.resize(_glyphs.size());
-	for (int i = 0; i < _glyphs.size(); i++)
+	m_glyphPointers.resize(m_glyphs.size());
+	for (int i = 0; i < m_glyphs.size(); i++)
 	{
-		_glyphPointers[i] = &_glyphs[i];
+		m_glyphPointers[i] = &m_glyphs[i];
 	}
 	sortGlyphs();
 	createRenderBatches();
@@ -37,58 +37,58 @@ void GameEngine::SpriteBatch::end()
 
 void GameEngine::SpriteBatch::draw(const glm::vec4 & destRect, const glm::vec4 & uvRect, GLuint texture, float depth, const ColourRGBA8 & colour)
 {
-	_glyphs.emplace_back(destRect, uvRect, texture, depth, colour);
+	m_glyphs.emplace_back(destRect, uvRect, texture, depth, colour);
 }
 
 void GameEngine::SpriteBatch::renderBatch()
 {
-	glBindVertexArray(_vao);
-	for (int i = 0; i < _renderBatches.size(); i++)
+	glBindVertexArray(m_vao);
+	for (int i = 0; i < m_renderBatches.size(); i++)
 	{
-		glBindTexture(GL_TEXTURE_2D, _renderBatches[i]._texture);
-		glDrawArrays(GL_TRIANGLES, _renderBatches[i]._offset, _renderBatches[i]._numVertices);
+		glBindTexture(GL_TEXTURE_2D, m_renderBatches[i].m_texture);
+		glDrawArrays(GL_TRIANGLES, m_renderBatches[i].m_offset, m_renderBatches[i].m_numVertices);
 	}
 	glBindVertexArray(0);
 }
 
 void GameEngine::SpriteBatch::createRenderBatches()
 {
-	if (_glyphPointers.empty()) return;
+	if (m_glyphPointers.empty()) return;
 
 	std::vector<Vertex> vertices;
-	vertices.resize(_glyphPointers.size() * 6);
+	vertices.resize(m_glyphPointers.size() * 6);
 
 	int offset = 0;
 	int cv = 0;
-	_renderBatches.emplace_back(offset, 6, _glyphPointers[0]->texture);
-	vertices[cv++] = _glyphPointers[0]->topLeft;
-	vertices[cv++] = _glyphPointers[0]->bottomLeft;
-	vertices[cv++] = _glyphPointers[0]->bottomRight;
-	vertices[cv++] = _glyphPointers[0]->bottomRight;
-	vertices[cv++] = _glyphPointers[0]->topRight;
-	vertices[cv++] = _glyphPointers[0]->topLeft;
+	m_renderBatches.emplace_back(offset, 6, m_glyphPointers[0]->texture);
+	vertices[cv++] = m_glyphPointers[0]->topLeft;
+	vertices[cv++] = m_glyphPointers[0]->bottomLeft;
+	vertices[cv++] = m_glyphPointers[0]->bottomRight;
+	vertices[cv++] = m_glyphPointers[0]->bottomRight;
+	vertices[cv++] = m_glyphPointers[0]->topRight;
+	vertices[cv++] = m_glyphPointers[0]->topLeft;
 	offset += 6;
 
-	for (int cg = 1; cg < _glyphPointers.size(); cg++)
+	for (int cg = 1; cg < m_glyphPointers.size(); cg++)
 	{
-		if (_glyphPointers[cg]->texture != _glyphPointers[cg - 1]->texture)
+		if (m_glyphPointers[cg]->texture != m_glyphPointers[cg - 1]->texture)
 		{
-			_renderBatches.emplace_back(offset, 6, _glyphPointers[cg]->texture);
+			m_renderBatches.emplace_back(offset, 6, m_glyphPointers[cg]->texture);
 		}
 		else
 		{
-			_renderBatches.back()._numVertices += 6;
+			m_renderBatches.back().m_numVertices += 6;
 		}
-		vertices[cv++] = _glyphPointers[cg]->topLeft;
-		vertices[cv++] = _glyphPointers[cg]->bottomLeft;
-		vertices[cv++] = _glyphPointers[cg]->bottomRight;
-		vertices[cv++] = _glyphPointers[cg]->bottomRight;
-		vertices[cv++] = _glyphPointers[cg]->topRight;
-		vertices[cv++] = _glyphPointers[cg]->topLeft;
+		vertices[cv++] = m_glyphPointers[cg]->topLeft;
+		vertices[cv++] = m_glyphPointers[cg]->bottomLeft;
+		vertices[cv++] = m_glyphPointers[cg]->bottomRight;
+		vertices[cv++] = m_glyphPointers[cg]->bottomRight;
+		vertices[cv++] = m_glyphPointers[cg]->topRight;
+		vertices[cv++] = m_glyphPointers[cg]->topLeft;
 		offset += 6;
 	}
 
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), nullptr, GL_STATIC_DRAW);
 
@@ -99,18 +99,18 @@ void GameEngine::SpriteBatch::createRenderBatches()
 
 void GameEngine::SpriteBatch::createVertexArray()
 {
-	if (_vao == 0)
+	if (m_vao == 0)
 	{
-		glGenVertexArrays(1, &_vao);
+		glGenVertexArrays(1, &m_vao);
 	}
 
-	glBindVertexArray(_vao);
+	glBindVertexArray(m_vao);
 
-	if (_vbo == 0)
+	if (m_vbo == 0)
 	{
-		glGenBuffers(1, &_vbo);
+		glGenBuffers(1, &m_vbo);
 	}
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -125,16 +125,16 @@ void GameEngine::SpriteBatch::createVertexArray()
 
 void GameEngine::SpriteBatch::sortGlyphs()
 {
-	switch (_sortType)
+	switch (m_sortType)
 	{
 	case GlyphSortType::BACK_TO_FRONT:
-		std::stable_sort(_glyphPointers.begin(), _glyphPointers.end(), compareBackToFront);
+		std::stable_sort(m_glyphPointers.begin(), m_glyphPointers.end(), compareBackToFront);
 		break;
 	case GlyphSortType::FRONT_TO_BACK:
-		std::stable_sort(_glyphPointers.begin(), _glyphPointers.end(), compareFrontToBack);
+		std::stable_sort(m_glyphPointers.begin(), m_glyphPointers.end(), compareFrontToBack);
 		break;
 	case GlyphSortType::TEXTURE:
-		std::stable_sort(_glyphPointers.begin(), _glyphPointers.end(), compareTexture);
+		std::stable_sort(m_glyphPointers.begin(), m_glyphPointers.end(), compareTexture);
 		break;
 	}
 }
