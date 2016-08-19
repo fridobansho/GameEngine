@@ -38,7 +38,7 @@ bool Agent::collideWithLevel(const std::vector<std::string>& levelData)
 
 	if (collideTilePositions.size() == 0) return false;
 
-	for (int i = 0; i < collideTilePositions.size(); i++)
+	for (size_t i = 0; i < collideTilePositions.size(); i++)
 	{
 		collideWithTile(collideTilePositions[i]);
 	}
@@ -135,7 +135,7 @@ void Agent::checkTilePosition(const std::vector<std::string>& levelData, std::ve
 	if ((cornerPos.x < 0 || cornerPos.x >= levelData[0].size()) || (cornerPos.y < 0 || cornerPos.y >= levelData.size()))
 		return;
 
-	if (levelData[cornerPos.y][cornerPos.x] != '.')
+	if (levelData[(unsigned int)cornerPos.y][(unsigned int)cornerPos.x] != '.')
 	{
 		collideTilePositions.push_back(cornerPos * (float)TILE_WIDTH + glm::vec2((float)TILE_WIDTH / 2.0f));
 	}

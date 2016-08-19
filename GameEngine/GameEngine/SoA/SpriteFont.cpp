@@ -95,7 +95,7 @@ namespace GameEngine {
         int ly = padding;
         for (int ri = 0; ri < bestRows; ri++) {
             int lx = padding;
-            for (int ci = 0; ci < bestPartition[ri].size(); ci++) {
+            for (size_t ci = 0; ci < bestPartition[ri].size(); ci++) {
                 int gi = bestPartition[ri][ci];
 
                 SDL_Surface* glyphSurface = TTF_RenderGlyph_Blended(f, (char)(cs + gi), fg);
@@ -105,7 +105,7 @@ namespace GameEngine {
                 int cp = glyphSurface->w * glyphSurface->h * 4;
                 for (int i = 0; i < cp; i += 4) {
                     float a = sp[i + 3] / 255.0f;
-                    sp[i] *= a;
+                    sp[i] *= (unsigned char)a;
                     sp[i + 1] = sp[i];
                     sp[i + 2] = sp[i];
                 }

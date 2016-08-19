@@ -88,7 +88,7 @@ void GameEngine::SpriteBatch::begin(GlyphSortType sortType)
 void GameEngine::SpriteBatch::end()
 {
 	m_glyphPointers.resize(m_glyphs.size());
-	for (int i = 0; i < m_glyphs.size(); i++)
+	for (size_t i = 0; i < m_glyphs.size(); i++)
 	{
 		m_glyphPointers[i] = &m_glyphs[i];
 	}
@@ -118,7 +118,7 @@ void GameEngine::SpriteBatch::draw(const glm::vec4 & destRect, const glm::vec4 &
 void GameEngine::SpriteBatch::renderBatch()
 {
 	glBindVertexArray(m_vao);
-	for (int i = 0; i < m_renderBatches.size(); i++)
+	for (size_t i = 0; i < m_renderBatches.size(); i++)
 	{
 		glBindTexture(GL_TEXTURE_2D, m_renderBatches[i].m_texture);
 		glDrawArrays(GL_TRIANGLES, m_renderBatches[i].m_offset, m_renderBatches[i].m_numVertices);
@@ -144,7 +144,7 @@ void GameEngine::SpriteBatch::createRenderBatches()
 	vertices[cv++] = m_glyphPointers[0]->topLeft;
 	offset += 6;
 
-	for (int cg = 1; cg < m_glyphPointers.size(); cg++)
+	for (size_t cg = 1; cg < m_glyphPointers.size(); cg++)
 	{
 		if (m_glyphPointers[cg]->texture != m_glyphPointers[cg - 1]->texture)
 		{

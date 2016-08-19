@@ -33,9 +33,9 @@ Level::Level(const string & fileName)
 	glm::vec4 uvRect(0.0f, 0.0f, 1.0f, 1.0f);
 	GameEngine::ColourRGBA8 whiteColour(255, 255, 255, 255);
 
-	for (int y = 0; y < m_levelData.size(); y++)
+	for (size_t y = 0; y < m_levelData.size(); y++)
 	{
-		for (int x = 0; x < m_levelData[y].size(); x++)
+		for (size_t x = 0; x < m_levelData[y].size(); x++)
 		{
 			char tile = m_levelData[y][x];
 			glm::vec4 destRect(x * TILE_WIDTH, y * TILE_WIDTH, TILE_WIDTH, TILE_WIDTH);
@@ -43,8 +43,8 @@ Level::Level(const string & fileName)
 			{
 			case '@':
 				m_levelData[y][x] = '.';
-				m_startPlayerPosition.x = x * TILE_WIDTH;
-				m_startPlayerPosition.y = y * TILE_WIDTH;
+				m_startPlayerPosition.x = (float)x * TILE_WIDTH;
+				m_startPlayerPosition.y = (float)y * TILE_WIDTH;
 				break;
 			case 'R':
 			case 'B':

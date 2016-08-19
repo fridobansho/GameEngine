@@ -27,22 +27,22 @@ namespace GameEngine
 	{
 		calculateFPS();
 
-		float frameTicks = SDL_GetTicks() - m_startTicks;
+		Uint32 frameTicks = SDL_GetTicks() - m_startTicks;
 
 		if ((1000.0f / m_maxFPS) > frameTicks)
 		{
-			SDL_Delay((1000.0f / m_maxFPS) - frameTicks);
+			SDL_Delay((Uint32)(1000.0f / m_maxFPS) - frameTicks);
 		}
 		return m_fps;
 	}
 	void FPSLimiter::calculateFPS()
 	{
 		static const int NUM_SAMPLES = 10;
-		static float frameTimes[NUM_SAMPLES];
+		static Uint32 frameTimes[NUM_SAMPLES];
 		static int currentFrame = 0;
 
-		static float prevTicks = SDL_GetTicks();
-		float currentTicks = SDL_GetTicks();
+		static Uint32 prevTicks = SDL_GetTicks();
+		Uint32 currentTicks = SDL_GetTicks();
 
 		m_frameTime = currentTicks - prevTicks;
 		frameTimes[currentFrame % NUM_SAMPLES] = m_frameTime;

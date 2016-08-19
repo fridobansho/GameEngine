@@ -33,17 +33,17 @@ MainGame::MainGame() :
 
 MainGame::~MainGame()
 {
-	for (int i = 0; i < m_levels.size(); i++)
+	for (auto& l : m_levels)
 	{
-		delete m_levels[i];
+		delete l;
 	}
-	for (int i = 0; i < m_humans.size(); i++)
+	for (auto& h : m_humans)
 	{
-		delete m_humans[i];
+		delete h;
 	}
-	for (int i = 0; i < m_zombies.size(); i++)
+	for (auto& z : m_zombies)
 	{
-		delete m_zombies[i];
+		delete z;
 	}
 }
 
@@ -64,7 +64,7 @@ void MainGame::initSystems() {
 
 	m_audioEngine.init();
 
-	m_window.Create("Zombie Game", m_screenWidth, m_screenHeight, 0);
+	m_window.Create("Zombie Game", m_screenWidth, m_screenHeight, 0U);
 
 	glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 
@@ -101,7 +101,7 @@ void MainGame::initLevel()
 	m_humans.push_back(m_player);
 
 	std::mt19937 randomEngine;
-	randomEngine.seed(time(nullptr));
+	randomEngine.seed((unsigned int)time(nullptr));
 	std::uniform_int_distribution<int> randomX(1, m_levels[m_currentLevel]->getWidth() - 2);
 	std::uniform_int_distribution<int> randomY(1, m_levels[m_currentLevel]->getHeight() - 2);
 
@@ -114,7 +114,7 @@ void MainGame::initLevel()
 
 	const std::vector<glm::vec2>& zombiePositions = m_levels[m_currentLevel]->getZombiePositions();
 
-	for (int i = 0; i < zombiePositions.size(); i++)
+	for (size_t i = 0; i < zombiePositions.size(); i++)
 	{
 		m_zombies.push_back(new Zombie);
 		m_zombies.back()->init(ZOMBIE_SPEED, zombiePositions[i]);
@@ -149,14 +149,14 @@ void MainGame::gameLoop()
 	const float DESIRED_FRAMETIME = MS_PER_SECOND / DESIRED_FPS;
 	const float MAX_DELTA_TIME = 1.0f;
 
-	float previousTicks = SDL_GetTicks();
+	Uint32 previousTicks = SDL_GetTicks();
 
 	while (m_gameState == GameState::PLAY)
 	{
 		fpsLimiter.begin();
 
-		float newTicks = SDL_GetTicks();
-		float frameTime = newTicks - previousTicks;
+		Uint32 newTicks = SDL_GetTicks();
+		Uint32 frameTime = newTicks - previousTicks;
 		previousTicks = newTicks;
 
 		float totalDeltaTime = frameTime / DESIRED_FRAMETIME;
@@ -194,23 +194,23 @@ void MainGame::gameLoop()
 
 void MainGame::updateAgents(float deltaTime)
 {
-	for (int i = 0; i < m_humans.size(); i++)
+	for (auto& h : m_humans)
 	{
-		m_humans[i]->update(m_levels[m_currentLevel]->getLevelData(), m_humans, m_zombies, deltaTime);
+		h->update(m_levels[m_currentLevel]->getLevelData(), m_humans, m_zombies, deltaTime);
 	}
 
-	for (int i = 0; i < m_zombies.size(); i++)
+	for (auto& z : m_zombies)
 	{
-		m_zombies[i]->update(m_levels[m_currentLevel]->getLevelData(), m_humans, m_zombies, deltaTime);
+		z->update(m_levels[m_currentLevel]->getLevelData(), m_humans, m_zombies, deltaTime);
 	}
 
-	for (int i = 0; i < m_zombies.size(); i++)
+	for (size_t i = 0; i < m_zombies.size(); i++)
 	{
-		for (int j = i + 1; j < m_zombies.size(); j++)
+		for (size_t j = i + 1; j < m_zombies.size(); j++)
 		{
 			m_zombies[i]->collideWithAgent(m_zombies[j]);
 		}
-		for (int j =1; j < m_humans.size(); j++)
+		for (size_t j =1; j < m_humans.size(); j++)
 		{
 			if (m_zombies[i]->collideWithAgent(m_humans[j]))
 			{
@@ -228,9 +228,9 @@ void MainGame::updateAgents(float deltaTime)
 		}
 	}
 
-	for (int i = 0; i < m_humans.size(); i++)
+	for (size_t i = 0; i < m_humans.size(); i++)
 	{
-		for (int j = i + 1; j < m_humans.size(); j++)
+		for (size_t j = i + 1; j < m_humans.size(); j++)
 		{
 			m_humans[i]->collideWithAgent(m_humans[j]);
 		}
@@ -239,7 +239,7 @@ void MainGame::updateAgents(float deltaTime)
 
 void MainGame::updateBullets(float deltaTime)
 {
-	for (int i = 0; i < m_bullets.size();)
+	for (size_t i = 0; i < m_bullets.size();)
 	{
 		if (m_bullets[i].update(m_levels[m_currentLevel]->getLevelData(), deltaTime))
 		{
@@ -252,10 +252,10 @@ void MainGame::updateBullets(float deltaTime)
 
 	bool wasBulletRemoved;
 
-	for (int i = 0; i < m_bullets.size();i++)
+	for (size_t i = 0; i < m_bullets.size();i++)
 	{
 		wasBulletRemoved = false;
-		for (int j = 0; j < m_zombies.size();)
+		for (size_t j = 0; j < m_zombies.size();)
 		{
 			if (m_bullets[i].collideWithAgent(m_zombies[j]))
 			{
@@ -281,7 +281,7 @@ void MainGame::updateBullets(float deltaTime)
 		}
 		if (wasBulletRemoved == false)
 		{
-			for (int j = 1; j < m_humans.size();)
+			for (size_t j = 1; j < m_humans.size();)
 			{
 				if (m_bullets[i].collideWithAgent(m_humans[j]))
 				{
@@ -329,7 +329,7 @@ void MainGame::processInput() {
                 // Exit the game here!
                 break;
             case SDL_MOUSEMOTION:
-                m_inputManager.setMouseCoords(evnt.motion.x, evnt.motion.y);
+                m_inputManager.setMouseCoords((float)evnt.motion.x, (float)evnt.motion.y);
                 break;
             case SDL_KEYDOWN:
                 m_inputManager.pressKey(evnt.key.keysym.sym);
@@ -370,20 +370,20 @@ void MainGame::drawGame() {
 
 	const glm::vec2 agentDims(AGENT_RADIUS * 2.0f);
 
-	for (int i = 0; i < m_humans.size(); i++)
+	for (auto& h : m_humans)
 	{
-		if (m_camera.isBoxInView(m_humans[i]->getPosition(), agentDims))
-			m_humans[i]->draw(m_agentSpriteBatch);
+		if (m_camera.isBoxInView(h->getPosition(), agentDims))
+			h->draw(m_agentSpriteBatch);
 	}
-	for (int i = 0; i < m_zombies.size(); i++)
+	for (auto& z : m_zombies)
 	{
-		if (m_camera.isBoxInView(m_zombies[i]->getPosition(), agentDims))
-			m_zombies[i]->draw(m_agentSpriteBatch);
+		if (m_camera.isBoxInView(z->getPosition(), agentDims))
+			z->draw(m_agentSpriteBatch);
 	}
 
-	for (int i = 0; i < m_bullets.size(); i++)
+	for (auto& b : m_bullets)
 	{
-		m_bullets[i].draw(m_agentSpriteBatch);
+		b.draw(m_agentSpriteBatch);
 	}
 
 	m_agentSpriteBatch.end();
@@ -427,7 +427,7 @@ void MainGame::drawHud()
 
 void MainGame::addBlood(const glm::vec2 & position, int numParticles)
 {
-	static mt19937 randEngine(time(nullptr));
+	static mt19937 randEngine((unsigned int)time(nullptr));
 	static uniform_real_distribution<float> randAngle(0.0f, 360.0f);
 
 	glm::vec2 velocity(2.0f, 0.0f);

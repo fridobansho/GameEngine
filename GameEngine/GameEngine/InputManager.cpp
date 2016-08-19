@@ -44,7 +44,6 @@ bool GameEngine::InputManager::isKeyDown(unsigned int keyId)
 
 bool GameEngine::InputManager::isKeyPressed(unsigned int keyId)
 {
-	bool isPressed;
 	if (isKeyDown(keyId) == true && wasKeyDown(keyId) == false)
 		return true;
 	return false;

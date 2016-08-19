@@ -36,7 +36,7 @@ void MainGame::InitSystems()
 {
 	GameEngine::Init();
 
-	m_window.Create("Game Engine", m_screenWidth, m_screenHeight, 0);
+	m_window.Create("Game Engine", m_screenWidth, m_screenHeight, 0U);
 
 	InitShaders();
 
@@ -64,7 +64,7 @@ void MainGame::GameLoop()
 
 		m_camera.Update();
 
-		for (int i = 0; i < m_bullets.size();)
+		for (size_t i = 0; i < m_bullets.size();)
 		{
 			if (m_bullets[i].update())
 			{
@@ -105,7 +105,7 @@ void MainGame::ProcessInput()
 			m_gameState = GameState::EXIT;
 			break;
 		case SDL_MOUSEMOTION:
-			m_inputManager.setMouseCoords(event.motion.x, event.motion.y);
+			m_inputManager.setMouseCoords((float)event.motion.x, (float)event.motion.y);
 			break;
 		case SDL_KEYDOWN:
 			m_inputManager.pressKey(event.key.keysym.sym);
@@ -182,7 +182,7 @@ void MainGame::DrawGame()
 
 	m_spriteBatch.draw(position, uv, texture.id, 0.0f, colour);
 
-	for (int i = 0; i < m_bullets.size(); i++)
+	for (size_t i = 0; i < m_bullets.size(); i++)
 	{
 		m_bullets[i].draw(m_spriteBatch);
 	}
