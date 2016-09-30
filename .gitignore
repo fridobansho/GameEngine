@@ -198,3 +198,4 @@ FakesAssemblies/
 # Visual Studio 2015 IntelliSense files
 *.opendb
 *.VC.db
+Thumbs.db

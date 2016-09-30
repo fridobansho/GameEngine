@@ -34,6 +34,9 @@
     <Filter Include="Audio\Sounds\shots">
       <UniqueIdentifier>{391b154a-032a-455a-8502-7f60b9f9f1d1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fonts">
+      <UniqueIdentifier>{5164268c-7ebc-4ee7-96ba-a5398016832e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -153,6 +156,9 @@
     <Text Include="Levels\level1.txt">
       <Filter>Levels</Filter>
     </Text>
+    <Text Include="Fonts\chintzycpu.txt">
+      <Filter>Fonts</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <Media Include="Audio\Sounds\shots\cg1.wav">
@@ -167,5 +173,13 @@
     <Media Include="Audio\Sounds\shots\shotgun.wav">
       <Filter>Audio\Sounds\shots</Filter>
     </Media>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Fonts\chintzy.ttf">
+      <Filter>Fonts</Filter>
+    </Font>
+    <Font Include="Fonts\chintzys.ttf">
+      <Filter>Fonts</Filter>
+    </Font>
   </ItemGroup>
 </Project>
