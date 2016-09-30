@@ -69,6 +69,7 @@
     <Image Include="Textures\zombie.png" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="Fonts\chintzycpu.txt" />
     <Text Include="Levels\level1.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -76,6 +77,10 @@
     <Media Include="Audio\Sounds\shots\pistol.wav" />
     <Media Include="Audio\Sounds\shots\rifle.wav" />
     <Media Include="Audio\Sounds\shots\shotgun.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Fonts\chintzy.ttf" />
+    <Font Include="Fonts\chintzys.ttf" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3BD2E907-C068-442C-992C-ACA6F67EE54F}</ProjectGuid>
