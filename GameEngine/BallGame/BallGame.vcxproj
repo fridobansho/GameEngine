@@ -33,8 +33,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />
-    <None Include="Shaders\colourShading.frag" />
-    <None Include="Shaders\colourShading.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7C6DD87E-6240-4641-8BF5-D1831AB93C24}</ProjectGuid>
@@ -126,12 +124,6 @@
     <ClInclude Include="BallController.h" />
     <ClInclude Include="BallRenderer.h" />
     <ClInclude Include="MainGame.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="Fonts\chintzy.ttf" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Textures\circle.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

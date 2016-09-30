@@ -13,15 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Fonts">
-      <UniqueIdentifier>{9b83abe4-4798-4c1c-b1b5-1c3e4cc61e5b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shaders">
-      <UniqueIdentifier>{0c657b96-a01e-4a74-a54e-0ef921836898}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Textures">
-      <UniqueIdentifier>{fc25fb34-9a12-4fdc-a9b8-810d8eb8e3d0}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -77,21 +68,5 @@
     <Content Include="..\packages\SDL2_mixer-2.0.1\lib\x86\smpeg2.dll">
       <Filter>Resource Files</Filter>
     </Content>
-    <None Include="Shaders\colourShading.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="Shaders\colourShading.vert">
-      <Filter>Shaders</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="Fonts\chintzy.ttf">
-      <Filter>Fonts</Filter>
-    </Font>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Textures\circle.png">
-      <Filter>Textures</Filter>
-    </Image>
   </ItemGroup>
 </Project>
