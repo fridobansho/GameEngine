@@ -2,7 +2,7 @@
 #include "Grid.h"
 
 void BallController::updateBalls(std::vector <Ball>& balls, Grid* grid, float deltaTime, int maxX, int maxY) {
-    const float FRICTION = 0.001f;
+    const float FRICTION = 0.01f;
     // Update our grabbed balls velocity
     if (m_grabbedBall != -1) {
         balls[m_grabbedBall].velocity = balls[m_grabbedBall].position - m_prevPos;
@@ -91,14 +91,14 @@ void BallController::onMouseMove(std::vector <Ball>& balls, float mouseX, float 
 
 void BallController::updateCollision(Grid* grid)
 {
-	for (int i = 0; i < grid->m_cells.size(); i++)
+	for (size_t i = 0; i < grid->m_cells.size(); i++)
 	{
 		int x = i % grid->m_numXCells;
 		int y = i / grid->m_numXCells;
 
 		Cell& cell = grid->m_cells[i];
 
-		for (int j = 0;j < cell.balls.size();j++)
+		for (size_t j = 0; j < cell.balls.size(); j++)
 		{
 			Ball* ball = cell.balls[j];
 			checkCollision(ball, cell.balls, j + 1);
@@ -125,13 +125,14 @@ void BallController::updateCollision(Grid* grid)
 
 void BallController::checkCollision(Ball* ball, std::vector<Ball*>& ballsToCheck, int startingIndex)
 {
-	for (int i = startingIndex; i < ballsToCheck.size(); i++)
+	for (size_t i = startingIndex; i < ballsToCheck.size(); i++)
 	{
 		checkCollision(*ball, *ballsToCheck[i]);
 	}
 }
 
 void BallController::checkCollision(Ball& b1, Ball& b2) {
+    // We add radius since position is the top left corner
     glm::vec2 distVec = b2.position - b1.position;
     glm::vec2 distDir = glm::normalize(distVec);
     float dist = glm::length(distVec);
@@ -141,14 +142,12 @@ void BallController::checkCollision(Ball& b1, Ball& b2) {
     // Check for collision
     if (collisionDepth > 0) {
 
-        // Push away the less massive one
-        if (b1.mass < b2.mass) {
-            b1.position -= distDir * collisionDepth;
-        } else {
-            b2.position += distDir * collisionDepth;
-        }
+        // Push away the balls based on ratio of masses
+        b1.position -= distDir * collisionDepth * (b2.mass / b1.mass) * 0.5f;
+        b2.position += distDir * collisionDepth * (b1.mass / b2.mass) * 0.5f;
 
         // Calculate deflection. http://stackoverflow.com/a/345863
+        // Fixed thanks to youtube user Sketchy502
         float aci = glm::dot(b1.velocity, distDir);
         float bci = glm::dot(b2.velocity, distDir);
 
@@ -157,6 +156,14 @@ void BallController::checkCollision(Ball& b1, Ball& b2) {
 
         b1.velocity += (acf - aci) * distDir;
         b2.velocity += (bcf - bci) * distDir;
+
+        if (glm::length(b1.velocity + b2.velocity) > 0.5f) {
+            // Choose the faster ball
+            bool choice = glm::length(b1.velocity) < glm::length(b2.velocity);
+
+            // Faster ball transfers it's colour to the slower ball
+            choice ? b2.colour = b1.colour : b1.colour = b2.colour;
+        }
     }
 }
 
@@ -166,7 +173,7 @@ bool BallController::isMouseOnBall(Ball&b, float mouseX, float mouseY) {
 }
 
 glm::vec2 BallController::getGravityAccel() {
-    const float GRAVITY_FORCE = 0.1f;
+    const float GRAVITY_FORCE = 0.02f;
     glm::vec2 gravity;
 
     switch (m_gravityDirection) {

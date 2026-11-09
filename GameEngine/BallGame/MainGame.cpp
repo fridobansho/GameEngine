@@ -48,7 +48,7 @@ void MainGame::run() {
             // Update all physics here and pass in deltaTime
 
             update(deltaTime);
-
+          
             // Since we just took a step that is length deltaTime, subtract from totalDeltaTime
             totalDeltaTime -= deltaTime;
             // Increment our frame counter so we can limit steps to MAX_PHYSICS_STEPS
@@ -64,15 +64,15 @@ void MainGame::run() {
 void MainGame::init() {
     GameEngine::Init();
 
-    m_screenWidth = 1024;
-    m_screenHeight = 768;
+    m_screenWidth = 1920;
+    m_screenHeight = 1080;
 
     m_window.Create("Ball Game", m_screenWidth, m_screenHeight, 0);
     glClearColor(0.0, 0.0, 0.0, 1.0);
     m_camera.Init(m_screenWidth, m_screenHeight);
     // Point the camera to the center of the screen
     m_camera.SetPosition(glm::vec2(m_screenWidth / 2.0f, m_screenHeight / 2.0f));
-
+    
     m_spriteBatch.init();
     // Initialize sprite font
     m_spriteFont = std::make_unique<GameEngine::SpriteFont>("Fonts/chintzy.ttf", 40);
@@ -86,6 +86,14 @@ void MainGame::init() {
 
     m_fpsLimiter.setMaxFPS(60.0f);
 
+    initRenderers();
+}
+
+void MainGame::initRenderers() {
+    m_ballRenderers.push_back(std::make_unique<BallRenderer>());
+    m_ballRenderers.push_back(std::make_unique<MomentumBallRenderer>());
+    m_ballRenderers.push_back(std::make_unique<VelocityBallRenderer>(m_screenWidth, m_screenHeight));
+    m_ballRenderers.push_back(std::make_unique<TrippyBallRenderer>(m_screenWidth, m_screenHeight));
 }
 
 struct BallSpawn {
@@ -108,14 +116,15 @@ struct BallSpawn {
 #include <iostream>
 void MainGame::initBalls() {
 
-	m_grid = std::make_unique<Grid>(m_screenWidth, m_screenHeight, CELL_SIZE);
+    // Initialize the grid
+    m_grid = std::make_unique<Grid>(m_screenWidth, m_screenHeight, CELL_SIZE);
 
 #define ADD_BALL(p, ...) \
     totalProbability += p; \
     possibleBalls.emplace_back(__VA_ARGS__);
 
     // Number of balls to spawn
-    const int NUM_BALLS = 10000;
+    const int NUM_BALLS = 20000;
 
     // Random engine stuff
     std::mt19937 randomEngine((unsigned int)time(nullptr));
@@ -127,13 +136,28 @@ void MainGame::initBalls() {
     std::vector <BallSpawn> possibleBalls;
     float totalProbability = 0.0f;
 
+    /// Random values for ball types
+    std::uniform_real_distribution<float> r1(2.0f, 6.0f);
+    std::uniform_int_distribution<int> r2(0, 255);
+
     // Adds the balls using a macro
-    ADD_BALL(20.0f, GameEngine::ColourRGBA8(255, 255, 255, 255),
-             1.0f, 1.0f, 0.1f, 7.0f, totalProbability);
-    ADD_BALL(10.0f, GameEngine::ColourRGBA8(0, 0, 255, 255),
+    ADD_BALL(1.0f, GameEngine::ColourRGBA8(255, 255, 255, 255),
+             2.0f, 1.0f, 0.1f, 7.0f, totalProbability);
+    ADD_BALL(1.0f, GameEngine::ColourRGBA8(1, 254, 145, 255),
              2.0f, 2.0f, 0.1f, 3.0f, totalProbability);
-    ADD_BALL(1.0f, GameEngine::ColourRGBA8(255, 0, 0, 255),
+    ADD_BALL(1.0f, GameEngine::ColourRGBA8(177, 0, 254, 255),
              3.0f, 4.0f, 0.0f, 0.0f, totalProbability)
+    ADD_BALL(1.0f, GameEngine::ColourRGBA8(254, 0, 0, 255),
+             3.0f, 4.0f, 0.0f, 0.0f, totalProbability);
+    ADD_BALL(1.0f, GameEngine::ColourRGBA8(0, 255, 255, 255),
+             3.0f, 4.0f, 0.0f, 0.0f, totalProbability);
+    ADD_BALL(1.0f, GameEngine::ColourRGBA8(255, 255, 0, 255),
+             3.0f, 4.0f, 0.0f, 0.0f, totalProbability);
+    // Make a bunch of random ball types
+    for (int i = 0; i < 10000; i++) {
+        ADD_BALL(1.0f, GameEngine::ColourRGBA8(r2(randomEngine), r2(randomEngine), r2(randomEngine), 255),
+                 r1(randomEngine), r1(randomEngine), 0.0f, 0.0f, totalProbability);
+    }
 
     // Random probability for ball spawn
     std::uniform_real_distribution<float> spawn(0.0f, totalProbability);
@@ -170,7 +194,8 @@ void MainGame::initBalls() {
         m_balls.emplace_back(ballToSpawn->radius, ballToSpawn->mass, pos, direction * ballToSpawn->randSpeed(randomEngine),
                              GameEngine::ResourceManager::GetTexture("Textures/circle.png").id,
                              ballToSpawn->colour);
-		m_grid->addBall(&m_balls.back());
+        // Add the ball do the grid. IF YOU EVER CALL EMPLACE BACK AFTER INIT BALLS, m_grid will have DANGLING POINTERS!
+        m_grid->addBall(&m_balls.back());
     }
 }
 
@@ -184,28 +209,21 @@ void MainGame::draw() {
     // Clear the colour and depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    m_textureProgram.Use();
-
     glActiveTexture(GL_TEXTURE0);
+
+    // Grab the camera matrix
+    glm::mat4 projectionMatrix = m_camera.getCameraMatrix();
+
+    m_ballRenderers[m_currentRenderer]->renderBalls(m_spriteBatch, m_balls, projectionMatrix);
+
+    m_textureProgram.Use();
 
     // Make sure the shader uses texture 0
     GLint textureUniform = m_textureProgram.GetUniformLocation("mySampler");
     glUniform1i(textureUniform, 0);
 
-    // Grab the camera matrix
-    glm::mat4 projectionMatrix = m_camera.getCameraMatrix();
     GLint pUniform = m_textureProgram.GetUniformLocation("P");
     glUniformMatrix4fv(pUniform, 1, GL_FALSE, &projectionMatrix[0][0]);
-
-    m_spriteBatch.begin();
-
-    // Draw balls
-    for (auto& ball : m_balls) {
-        m_ballRenderer.renderBall(m_spriteBatch, ball);
-    }
-
-    m_spriteBatch.end();
-    m_spriteBatch.renderBatch();
 
     drawHud();
 
@@ -228,6 +246,7 @@ void MainGame::drawHud() {
 }
 
 void MainGame::processInput() {
+    // Update input manager
     m_inputManager.update();
 
     SDL_Event evnt;
@@ -272,5 +291,13 @@ void MainGame::processInput() {
         m_ballController.setGravityDirection(GravityDirection::DOWN);
     } else if (m_inputManager.isKeyPressed(SDLK_SPACE)) {
         m_ballController.setGravityDirection(GravityDirection::NONE);
+    }
+
+    // Switch renderers
+    if (m_inputManager.isKeyPressed(SDLK_1)) {
+        m_currentRenderer++;
+        if (m_currentRenderer >= (int)m_ballRenderers.size()) {
+            m_currentRenderer = 0;
+        }
     }
 }
