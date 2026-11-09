@@ -78,6 +78,20 @@ void GameEngine::SpriteBatch::init()
 	createVertexArray();
 }
 
+void GameEngine::SpriteBatch::dispose()
+{
+	if (m_vao != 0)
+	{
+		glDeleteVertexArrays(1, &m_vao);
+		m_vao = 0;
+	}
+	if (m_vbo != 0)
+	{
+		glDeleteBuffers(1, &m_vbo);
+		m_vbo = 0;
+	}
+}
+
 void GameEngine::SpriteBatch::begin(GlyphSortType sortType)
 {
 	m_sortType = sortType;

@@ -10,15 +10,17 @@ namespace GameEngine {
 		GLSLProgram();
 		~GLSLProgram();
 
-		void CompileShaders(const std::string&, const std::string&);
+		void CompileShaders(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath);
+		void CompileShadersFromSource(const char* vertexSource, const char* fragmentSource);
 		void LinkShaders();
-		void AddAttribute(const std::string&);
-		GLint GetUniformLocation(const std::string&);
+		void AddAttribute(const std::string& attributeName);
+		GLint GetUniformLocation(const std::string& uniformName);
 		void Use();
 		void UnUse();
+		void Dispose();
 
 	private:
-		void CompileShader(const std::string&, GLuint);
+		void CompileShader(const char* source, const std::string& name, GLuint id);
 
 		int m_numAttributes = 0;
 

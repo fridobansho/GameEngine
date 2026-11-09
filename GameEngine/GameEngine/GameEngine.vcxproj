@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -92,9 +92,12 @@
   <ItemGroup>
     <ClCompile Include="AudioEngine.cpp" />
     <ClCompile Include="Camera2D.cpp" />
+    <ClCompile Include="DebugRenderer.cpp" />
     <ClCompile Include="GameEngineErrors.cpp" />
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="GLSLProgram.cpp" />
+    <ClCompile Include="GUI.cpp" />
+    <ClCompile Include="IMainGame.cpp" />
     <ClCompile Include="ImageLoader.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="IOManager.cpp" />
@@ -102,6 +105,7 @@
     <ClCompile Include="ParticleEngine2D.cpp" />
     <ClCompile Include="picoPNG.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="ScreenList.cpp" />
     <ClCompile Include="SoA\SpriteFont.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="SpriteBatch.cpp" />
@@ -115,10 +119,14 @@
   <ItemGroup>
     <ClInclude Include="AudioEngine.h" />
     <ClInclude Include="Camera2D.h" />
+    <ClInclude Include="DebugRenderer.h" />
     <ClInclude Include="GameEngineErrors.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="GLSLProgram.h" />
     <ClInclude Include="GLTexture.h" />
+    <ClInclude Include="GUI.h" />
+    <ClInclude Include="IGameScreen.h" />
+    <ClInclude Include="IMainGame.h" />
     <ClInclude Include="ImageLoader.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="IOManager.h" />
@@ -126,10 +134,13 @@
     <ClInclude Include="ParticleEngine2D.h" />
     <ClInclude Include="picoPNG.h" />
     <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="ScreenList.h" />
     <ClInclude Include="SoA\SpriteFont.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="SpriteBatch.h" />
+    <ClInclude Include="SpriteFont.h" />
     <ClInclude Include="TextureCache.h" />
+    <ClInclude Include="TileSheet.h" />
     <ClInclude Include="Timing.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="Window.h" />

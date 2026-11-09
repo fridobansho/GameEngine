@@ -50,6 +50,7 @@ namespace GameEngine
 		~SpriteBatch();
 
 		void init();
+		void dispose();
 
 		void begin(GlyphSortType sortType = GlyphSortType::TEXTURE);
 		void end();

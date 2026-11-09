@@ -19,6 +19,14 @@ int closestPow2(int i) {
 namespace GameEngine {
 
     SpriteFont::SpriteFont(const char* font, int size, char cs, char ce) {
+        init(font, size, cs, ce);
+    }
+
+    void SpriteFont::init(const char* font, int size) {
+        init(font, size, FIRST_PRINTABLE_CHAR, LAST_PRINTABLE_CHAR);
+    }
+
+    void SpriteFont::init(const char* font, int size, char cs, char ce) {
         // Initialize SDL_ttf
         if (!TTF_WasInit()) {
             TTF_Init();

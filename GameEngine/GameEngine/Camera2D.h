@@ -17,12 +17,16 @@ namespace GameEngine
 
 		glm::vec2 convertScreenToWorld(glm::vec2 screenCoords);
 
+		void OffsetPosition(const glm::vec2& offset) { m_position += offset; m_needsMatrixUpdate = true; }
+		void OffsetScale(float offset) { m_scale += offset; if (m_scale < 0.001f) m_scale = 0.001f; m_needsMatrixUpdate = true; }
+
 		void SetPosition(const glm::vec2& newPosition) { m_position = newPosition; m_needsMatrixUpdate = true;	}
 		void SetScale(float newScale) { m_scale = newScale; m_needsMatrixUpdate = true; }
 
-		glm::vec2 & GetPosition() { return m_position; }
-		float GetScale() { return m_scale; }
-		glm::mat4 getCameraMatrix() { return m_cameraMatrix; }
+		const glm::vec2& GetPosition() const { return m_position; }
+		float GetScale() const { return m_scale; }
+		const glm::mat4& getCameraMatrix() const { return m_cameraMatrix; }
+		float getAspectRatio() const { return (float)m_screenWidth / (float)m_screenHeight; }
 
 	private:
 		int m_screenWidth = 500;
