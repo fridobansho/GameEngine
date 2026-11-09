@@ -25,8 +25,8 @@ bool Bullet::update(const std::vector<std::string>& levelData, float deltaTime)
 
 void Bullet::draw(GameEngine::SpriteBatch& spriteBatch)
 {
-	glm::vec4 destRect(m_position.x + BULLET_RADIUS,
-		m_position.y + BULLET_RADIUS,
+	glm::vec4 destRect(m_position.x,
+		m_position.y,
 		BULLET_RADIUS * 2,
 		BULLET_RADIUS * 2);
 

@@ -274,6 +274,7 @@ void MainGame::updateBullets(float deltaTime)
 				m_bullets[i] = m_bullets.back();
 				m_bullets.pop_back();
 				wasBulletRemoved = true;
+				i--;
 				break;
 			}
 			else
@@ -300,6 +301,7 @@ void MainGame::updateBullets(float deltaTime)
 					m_bullets.pop_back();
 					wasBulletRemoved = true;
 					m_numHumansKilled++;
+					i--;
 					break;
 				}
 				else

@@ -43,7 +43,7 @@ namespace GameEngine
 		float xDepth = MIN_DISTANCE_X - abs(distVec.x);
 		float yDepth = MIN_DISTANCE_Y - abs(distVec.y);
 
-		if (xDepth > 0 && xDepth > 0)
+		if (xDepth > 0 && yDepth > 0)
 		{
 			return true;
 		}

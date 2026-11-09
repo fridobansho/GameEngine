@@ -22,7 +22,7 @@ public:
 
 	void removeBallFromCell(Ball* ball);
 private:
-	std::vector<Cell*> m_cells;
+	std::vector<Cell> m_cells;
 	int m_cellSize;
 	int m_width;
 	int m_height;

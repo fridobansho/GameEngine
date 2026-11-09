@@ -63,7 +63,7 @@ void Player::update(const std::vector<std::string>& levelData,
 		m_position.x += m_speed * deltaTime;
 	}
 
-	if (m_inputManager->isKeyDown(SDLK_1) && (m_guns.size() >= 0))
+	if (m_inputManager->isKeyDown(SDLK_1) && (m_guns.size() >= 1))
 	{
 		m_currentGunIndex = 0;
 	}

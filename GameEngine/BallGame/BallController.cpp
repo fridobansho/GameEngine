@@ -96,7 +96,7 @@ void BallController::updateCollision(Grid* grid)
 		int x = i % grid->m_numXCells;
 		int y = i / grid->m_numXCells;
 
-		Cell& cell = *grid->m_cells[i];
+		Cell& cell = grid->m_cells[i];
 
 		for (int j = 0;j < cell.balls.size();j++)
 		{

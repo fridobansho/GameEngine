@@ -32,13 +32,13 @@ void Gun::update(bool isMouseDown, const glm::vec2& position, const glm::vec2& d
 
 void Gun::fire(const glm::vec2& position, const glm::vec2& direction, std::vector<Bullet>& bullets)
 {
-	std::mt19937 randomEngine((unsigned int)time(nullptr));
+	static std::mt19937 randomEngine((unsigned int)time(nullptr));
 	std::uniform_real_distribution<float> randomRotate(-m_spread, m_spread);
 
 	m_fireEffect.play();
 
 	for (int i = 0; i < m_bulletsPerShot; i++)
 	{
-		bullets.emplace_back(position, glm::rotate(direction, randomRotate(randomEngine)), m_bulletDamage, m_bulletSpeed);
+		bullets.emplace_back(position - glm::vec2(BULLET_RADIUS), glm::rotate(direction, randomRotate(randomEngine)), m_bulletDamage, m_bulletSpeed);
 	}
 }

@@ -15,6 +15,8 @@ namespace GameEngine {
 
 	void GLSLProgram::CompileShaders(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath)
 	{
+		m_programId = glCreateProgram();
+
 		m_vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
 
 		if (m_vertexShaderId == 0)
@@ -101,8 +103,6 @@ namespace GameEngine {
 
 	void GLSLProgram::CompileShader(const std::string & filePath, GLuint id)
 	{
-		m_programId = glCreateProgram();
-
 		std::ifstream vertexFile(filePath);
 
 		if (vertexFile.fail())

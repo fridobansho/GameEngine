@@ -105,7 +105,7 @@ namespace GameEngine {
                 int cp = glyphSurface->w * glyphSurface->h * 4;
                 for (int i = 0; i < cp; i += 4) {
                     float a = sp[i + 3] / 255.0f;
-                    sp[i] *= (unsigned char)a;
+                    sp[i] = (unsigned char)((float)sp[i] * a);
                     sp[i + 1] = sp[i];
                     sp[i + 2] = sp[i];
                 }

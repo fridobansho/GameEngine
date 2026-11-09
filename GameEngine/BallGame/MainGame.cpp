@@ -228,6 +228,8 @@ void MainGame::drawHud() {
 }
 
 void MainGame::processInput() {
+    m_inputManager.update();
+
     SDL_Event evnt;
     //Will keep looping until there are no more events to process
     while (SDL_PollEvent(&evnt)) {
