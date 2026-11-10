@@ -28,7 +28,34 @@ if(NOT EXISTS "${SDL_COMPAT_INCLUDE_DIR}/SDL")
 endif()
 
 # Optional CEGUI detection for GUI.cpp and NinjaPlatformer
-pkg_check_modules(CEGUI QUIET cegui-0 cegui-0-opengl)
+# Supports both Ubuntu/Debian (libcegui-mk2-dev -> CEGUI-0 / cegui-0.8.7)
+# and Fedora (cegui-devel -> CEGUI-0 / cegui-0)
+pkg_check_modules(CEGUI QUIET CEGUI-0 CEGUI-0-OPENGL)
+if(NOT CEGUI_FOUND)
+    pkg_check_modules(CEGUI QUIET cegui-0 cegui-0-opengl)
+endif()
+
+# Also search multiarch and versioned header/library paths directly (Ubuntu/Debian)
+find_path(CEGUI_MAIN_INCLUDE_DIR
+    NAMES CEGUI/CEGUI.h
+    PATH_SUFFIXES cegui-0 cegui-0.8.7
+)
+find_path(CEGUI_CONFIG_INCLUDE_DIR
+    NAMES CEGUI/Config.h
+    PATH_SUFFIXES cegui-0 cegui-0.8.7
+)
+find_library(CEGUI_BASE_LIBRARY NAMES CEGUIBase-0)
+find_library(CEGUI_OPENGL_LIBRARY NAMES CEGUIOpenGLRenderer-0)
+
+if(NOT CEGUI_FOUND AND CEGUI_MAIN_INCLUDE_DIR AND CEGUI_BASE_LIBRARY AND CEGUI_OPENGL_LIBRARY)
+    set(CEGUI_FOUND TRUE)
+    set(CEGUI_INCLUDE_DIRS "${CEGUI_MAIN_INCLUDE_DIR}")
+    set(CEGUI_LIBRARIES "${CEGUI_BASE_LIBRARY}" "${CEGUI_OPENGL_LIBRARY}")
+endif()
+if(CEGUI_CONFIG_INCLUDE_DIR)
+    list(APPEND CEGUI_INCLUDE_DIRS "${CEGUI_CONFIG_INCLUDE_DIR}")
+    list(REMOVE_DUPLICATES CEGUI_INCLUDE_DIRS)
+endif()
 
 set(ENGINE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/GameEngine/GameEngine")
 
@@ -76,7 +103,9 @@ target_include_directories(GameEngine PUBLIC
 
 if(CEGUI_FOUND)
     target_include_directories(GameEngine PUBLIC ${CEGUI_INCLUDE_DIRS})
-    target_link_directories(GameEngine PUBLIC ${CEGUI_LIBRARY_DIRS})
+    if(CEGUI_LIBRARY_DIRS)
+        target_link_directories(GameEngine PUBLIC ${CEGUI_LIBRARY_DIRS})
+    endif()
     target_link_libraries(GameEngine PUBLIC ${CEGUI_LIBRARIES})
 endif()
 
