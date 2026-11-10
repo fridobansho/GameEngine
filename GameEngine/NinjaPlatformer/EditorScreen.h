@@ -13,6 +13,8 @@
 #include <GameEngine/SoA/SpriteFont.h>
 #include <GameEngine/Window.h>
 #include <vector>
+#include <string>
+#include <cstddef>
 
 #include <GameEngine/GUI.h>
 

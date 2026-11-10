@@ -41,7 +41,7 @@ namespace GameEngine {
 	}
 
 	void ScreenList::destroy() {
-		for (size_t i = 0; i < m_screens.size(); i++) {
+		for (std::size_t i = 0; i < m_screens.size(); i++) {
 			m_screens[i]->destroy();
 		}
 		m_screens.resize(0);

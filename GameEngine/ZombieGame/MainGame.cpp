@@ -12,7 +12,9 @@
 #include <ctime>
 #include <cstdio>
 #include <algorithm>
+#ifndef GLM_ENABLE_EXPERIMENTAL
 #define GLM_ENABLE_EXPERIMENTAL
+#endif
 #include <glm/gtx/rotate_vector.hpp>
 
 #include "Gun.h"
@@ -318,7 +320,7 @@ void MainGame::checkVictory()
 	if (m_zombies.empty())
 	{
 		std::printf("***You win! ***\n You killed %d humans and %d zombies. There are %d/%d civilians remaining",
-			m_numHumansKilled, m_numZombiesKilled, m_humans.size() - 1, m_levels[m_currentLevel]->getNumHumans());
+			m_numHumansKilled, m_numZombiesKilled, static_cast<int>(m_humans.size() - 1), m_levels[m_currentLevel]->getNumHumans());
 		GameEngine::FatalError("");
 	}
 }

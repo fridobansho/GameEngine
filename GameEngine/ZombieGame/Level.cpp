@@ -75,7 +75,7 @@ Level::Level(const string & fileName)
 			case '.':
 				break;
 			default:
-				printf("Unexpected symbol %c at (%d, %d)", tile, x, y);
+				printf("Unexpected symbol %c at (%d, %d)\n", tile, (int)x, (int)y);
 				break;
 			}
 		}

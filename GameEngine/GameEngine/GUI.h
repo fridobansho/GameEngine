@@ -4,6 +4,7 @@
 #include <CEGUI/RendererModules/OpenGL/GL3Renderer.h>
 #include <glm/glm.hpp>
 #include <SDL_events.h>
+#include <string>
 
 namespace GameEngine {
 	class GUI {

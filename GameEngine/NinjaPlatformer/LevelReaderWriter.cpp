@@ -2,6 +2,7 @@
 
 #include <GameEngine/ResourceManager.h>
 #include <fstream>
+#include <cstddef>
 
 // When you want to make a new version, add it here
 const unsigned int TEXT_VERSION_0 = 100;

@@ -1,7 +1,9 @@
 #include "Human.h"
 #include <ctime>
 #include <random>
+#ifndef GLM_ENABLE_EXPERIMENTAL
 #define GLM_ENABLE_EXPERIMENTAL
+#endif
 #include <glm/gtx/rotate_vector.hpp>
 #include <GameEngine/ResourceManager.h>
 
