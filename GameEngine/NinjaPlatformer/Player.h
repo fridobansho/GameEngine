@@ -12,7 +12,7 @@ public:
 	void init(b2World* world,
 	          const glm::vec2& position,
 	          const glm::vec2& drawDims,
-	          glm::vec2& collisionDims,
+	          const glm::vec2& collisionDims,
 	          GameEngine::ColourRGBA8 colour);
 	void destroy(b2World* world);
 

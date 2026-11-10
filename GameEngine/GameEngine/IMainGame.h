@@ -3,11 +3,11 @@
 #include "GameEngine.h"
 #include "Window.h"
 #include "InputManager.h"
+#include "ScreenList.h"
 #include <memory>
 
 namespace GameEngine {
 
-	class ScreenList;
 	class IGameScreen;
 
 	class IMainGame {

@@ -6,7 +6,7 @@
 void Player::init(b2World* world,
                   const glm::vec2& position,
                   const glm::vec2& drawDims,
-                  glm::vec2& collisionDims,
+                  const glm::vec2& collisionDims,
                   GameEngine::ColourRGBA8 colour) {
 	GameEngine::GLTexture texture = GameEngine::ResourceManager::GetTexture("Assets/blue_ninja.png");
 	m_colour = colour;
