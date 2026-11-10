@@ -10,7 +10,9 @@
 #include <iostream>
 #include <random>
 #include <ctime>
+#include <cstdio>
 #include <algorithm>
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
 
 #include "Gun.h"
@@ -128,7 +130,7 @@ void MainGame::initLevel()
 
 void MainGame::initShaders()
 {
-	m_colourProgram.CompileShaders("Shaders\\colourShading.vert", "Shaders\\colourShading.frag");
+	m_colourProgram.CompileShaders("Shaders/colourShading.vert", "Shaders/colourShading.frag");
 	m_colourProgram.AddAttribute("vertexPosition");
 	m_colourProgram.AddAttribute("vertexColour");
 	m_colourProgram.AddAttribute("vertexUV");
@@ -412,12 +414,12 @@ void MainGame::drawHud()
 
 	m_hudSpriteBatch.begin();
 
-	sprintf_s(buffer, "Num Humans %d", m_humans.size());
+	snprintf(buffer, sizeof(buffer), "Num Humans %zu", m_humans.size());
 
 	m_spriteFont->draw(m_hudSpriteBatch, buffer, glm::vec2(0, 0),
 		glm::vec2(0.5), 0.0f, GameEngine::ColourRGBA8(255, 255, 255, 255));
 
-	sprintf_s(buffer, "Num Zombies %d", m_zombies.size());
+	snprintf(buffer, sizeof(buffer), "Num Zombies %zu", m_zombies.size());
 
 	m_spriteFont->draw(m_hudSpriteBatch, buffer, glm::vec2(0, 36),
 		glm::vec2(0.5), 0.0f, GameEngine::ColourRGBA8(255, 255, 255, 255));
@@ -429,8 +431,8 @@ void MainGame::drawHud()
 
 void MainGame::addBlood(const glm::vec2 & position, int numParticles)
 {
-	static mt19937 randEngine((unsigned int)time(nullptr));
-	static uniform_real_distribution<float> randAngle(0.0f, 360.0f);
+	static std::mt19937 randEngine((unsigned int)time(nullptr));
+	static std::uniform_real_distribution<float> randAngle(0.0f, 360.0f);
 
 	glm::vec2 velocity(2.0f, 0.0f);
 	GameEngine::ColourRGBA8 col(255, 0, 0, 255);

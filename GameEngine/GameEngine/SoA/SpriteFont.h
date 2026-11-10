@@ -29,7 +29,7 @@
 #include <map>
 #include <vector>
 
-#include "..\Vertex.h"
+#include "../Vertex.h"
 
 namespace GameEngine {
 

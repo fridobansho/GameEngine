@@ -1,8 +1,10 @@
 #include "SpriteFont.h"
 
-#include "..\SpriteBatch.h"
+#include "../SpriteBatch.h"
 
 #include <SDL.h>
+#include <cstdio>
+#include <cstring>
 
 int closestPow2(int i) {
     i--;

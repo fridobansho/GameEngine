@@ -1,9 +1,14 @@
 #include "IOManager.h"
 
+#include <cstdio>
 #include <filesystem>
 #include <fstream>
 
+#if defined(_MSC_VER) && _MSC_VER < 1914
 namespace fs = std::tr2::sys;
+#else
+namespace fs = std::filesystem;
+#endif
 
 namespace GameEngine {
 	bool IOManager::ReadFileToBuffer(const std::string &filePath, std::vector<unsigned char>& buffer)

@@ -1,9 +1,15 @@
+#define _USE_MATH_DEFINES
 #include "EditorScreen.h"
 
+#include <cmath>
 #include <iostream>
 #include <GameEngine/ResourceManager.h>
 #include <GameEngine/IOManager.h>
 #include "LevelReaderWriter.h"
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 const int MOUSE_LEFT = 0;
 const int MOUSE_RIGHT = 1;

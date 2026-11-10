@@ -47,7 +47,7 @@ void MainGame::InitSystems()
 
 void MainGame::InitShaders()
 {
-	m_colourProgram.CompileShaders("Shaders\\colourShading.vert", "Shaders\\colourShading.frag");
+	m_colourProgram.CompileShaders("Shaders/colourShading.vert", "Shaders/colourShading.frag");
 	m_colourProgram.AddAttribute("vertexPosition");
 	m_colourProgram.AddAttribute("vertexColour");
 	m_colourProgram.AddAttribute("vertexUV");
