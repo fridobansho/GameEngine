@@ -2,6 +2,9 @@
 #include <string>
 #include <SDL.h>
 #include <cstdlib>
+#ifndef _WIN32
+#include <unistd.h>
+#endif
 
 #include "GameEngineErrors.h"
 
@@ -12,8 +15,10 @@ namespace GameEngine {
 #ifdef _WIN32
 		system("pause");
 #else
-		std::cout << "Press Enter to quit...";
-		std::cin.get();
+		if (isatty(fileno(stdin))) {
+			std::cout << "Press Enter to quit...";
+			std::cin.get();
+		}
 #endif
 		SDL_Quit();
 		exit(-1);

@@ -69,6 +69,10 @@ namespace GameEngine {
             return m_fontHeight;
         }
 
+        unsigned int getTextureID() const {
+            return m_texID;
+        }
+
         /// Measures the dimensions of the text
         glm::vec2 measure(const char* s);
 

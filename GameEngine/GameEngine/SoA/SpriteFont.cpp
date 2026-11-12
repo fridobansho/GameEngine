@@ -100,6 +100,9 @@ namespace GameEngine {
         glBindTexture(GL_TEXTURE_2D, m_texID);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bestWidth, bestHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
         // Now draw all the glyphs
         SDL_Color fg = { 255, 255, 255, 255 };
         int ly = padding;
@@ -109,19 +112,30 @@ namespace GameEngine {
                 int gi = bestPartition[ri][ci];
 
                 SDL_Surface* glyphSurface = TTF_RenderGlyph_Blended(f, (char)(cs + gi), fg);
+                if (!glyphSurface) {
+                    continue;
+                }
 
-                // Pre-multiplication occurs here
-                unsigned char* sp = (unsigned char*)glyphSurface->pixels;
-                int cp = glyphSurface->w * glyphSurface->h * 4;
-                for (int i = 0; i < cp; i += 4) {
-                    float a = sp[i + 3] / 255.0f;
-                    sp[i] = (unsigned char)((float)sp[i] * a);
-                    sp[i + 1] = sp[i];
-                    sp[i + 2] = sp[i];
+                // Pre-multiplication occurs here, packing rows into a tightly packed buffer.
+                // In modern SDL_ttf/FreeType, glyphSurface->pitch may be larger than glyphSurface->w * 4
+                // due to row alignment/padding, which previously caused severe horizontal skewing.
+                std::vector<unsigned char> packedPixels(glyphSurface->w * glyphSurface->h * 4);
+                for (int y = 0; y < glyphSurface->h; y++) {
+                    const unsigned char* srcRow = (const unsigned char*)glyphSurface->pixels + y * glyphSurface->pitch;
+                    unsigned char* dstRow = packedPixels.data() + y * glyphSurface->w * 4;
+                    for (int x = 0; x < glyphSurface->w; x++) {
+                        const unsigned char* sp = srcRow + x * 4;
+                        unsigned char* dp = dstRow + x * 4;
+                        float a = sp[3] / 255.0f;
+                        dp[0] = (unsigned char)((float)sp[0] * a);
+                        dp[1] = (unsigned char)((float)sp[1] * a);
+                        dp[2] = (unsigned char)((float)sp[2] * a);
+                        dp[3] = sp[3];
+                    }
                 }
 
                 // Save glyph image and update coordinates
-                glTexSubImage2D(GL_TEXTURE_2D, 0, lx, bestHeight - ly - 1 - glyphSurface->h, glyphSurface->w, glyphSurface->h, GL_BGRA, GL_UNSIGNED_BYTE, glyphSurface->pixels);
+                glTexSubImage2D(GL_TEXTURE_2D, 0, lx, bestHeight - ly - 1 - glyphSurface->h, glyphSurface->w, glyphSurface->h, GL_BGRA, GL_UNSIGNED_BYTE, packedPixels.data());
                 glyphRects[gi].x = lx;
                 glyphRects[gi].y = ly;
                 glyphRects[gi].z = glyphSurface->w;
@@ -134,6 +148,8 @@ namespace GameEngine {
             }
             ly += m_fontHeight + padding;
         }
+
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
         // Draw the unsupported glyph
         int rs = padding - 1;

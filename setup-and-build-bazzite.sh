@@ -126,16 +126,19 @@ run_inside_container() {
     echo "==> Building all targets..."
     cmake --build build
 
+    echo "==> Running automated tests..."
+    (cd build && ctest --output-on-failure)
+
     echo ""
     echo "============================================================================="
     echo "Build complete! Executables and linked assets are in: ${REPO_DIR}/build/bin/"
-    echo "To run a game inside the Distrobox container:"
-    echo "  distrobox enter ${CONTAINER_NAME} -- bash -c 'cd \"${REPO_DIR}/build/bin/TutorialGame\" && ./TutorialGame'"
-    echo "  distrobox enter ${CONTAINER_NAME} -- bash -c 'cd \"${REPO_DIR}/build/bin/ZombieGame\" && ./ZombieGame'"
-    echo "  distrobox enter ${CONTAINER_NAME} -- bash -c 'cd \"${REPO_DIR}/build/bin/BallGame\" && ./BallGame'"
-    if [[ -f "${REPO_DIR}/build/bin/NinjaPlatformer/NinjaPlatformer" ]]; then
-        echo "  distrobox enter ${CONTAINER_NAME} -- bash -c 'cd \"${REPO_DIR}/build/bin/NinjaPlatformer\" && ./NinjaPlatformer'"
-    fi
+    echo ""
+    echo "Quick run commands:"
+    echo "  ./run-ninja.sh      (or ./run.sh ninja)"
+    echo "  ./run-zombie.sh     (or ./run.sh zombie)"
+    echo "  ./run-ball.sh       (or ./run.sh ball)"
+    echo "  ./run-tutorial.sh   (or ./run.sh tutorial)"
+    echo "  ./run-tests.sh      (or ./run.sh tests)"
     echo "============================================================================="
 }
 

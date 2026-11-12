@@ -223,3 +223,73 @@ if(BUILD_NINJA_PLATFORMER AND CEGUI_FOUND)
 elseif(BUILD_NINJA_PLATFORMER AND NOT CEGUI_FOUND)
     message(STATUS "Skipping NinjaPlatformer: CEGUI-0 (cegui-0, cegui-0-opengl) was not found via pkg-config.")
 endif()
+
+# -----------------------------------------------------------------------------
+# 5. Automated Engine Tests (CTest)
+# -----------------------------------------------------------------------------
+enable_testing()
+
+set(TEST_SOURCES
+    "tests/main.cpp"
+    "tests/test_camera.cpp"
+    "tests/test_grid.cpp"
+    "tests/test_input.cpp"
+    "tests/test_screen_list.cpp"
+    "tests/test_iomanager.cpp"
+    "${BALL_GAME_DIR}/Grid.cpp"
+    "${BALL_GAME_DIR}/Ball.cpp"
+)
+
+if(TARGET Box2D_v231)
+    list(APPEND TEST_SOURCES
+        "tests/test_level_rw.cpp"
+        "tests/test_shaders.cpp"
+        "tests/test_spritefont.cpp"
+        "${NINJA_GAME_DIR}/LevelReaderWriter.cpp"
+        "${NINJA_GAME_DIR}/Box.cpp"
+        "${NINJA_GAME_DIR}/Capsule.cpp"
+        "${NINJA_GAME_DIR}/Player.cpp"
+    )
+endif()
+
+add_executable(EngineTests ${TEST_SOURCES})
+target_include_directories(EngineTests PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests"
+    "${BALL_GAME_DIR}"
+    "${NINJA_GAME_DIR}"
+)
+
+target_link_libraries(EngineTests PRIVATE GameEngine)
+if(TARGET Box2D_v231)
+    target_link_libraries(EngineTests PRIVATE Box2D_v231)
+    link_game_assets(EngineTests "${NINJA_GAME_DIR}" Shaders Assets Fonts Levels)
+endif()
+
+set(TEST_CASES
+    "Camera2D_BasicInitAndMatrix"
+    "Camera2D_FrustumCulling"
+    "Camera2D_ScreenToWorld"
+    "Grid_BoundaryClamping"
+    "Grid_AddAndRemoveBall"
+    "InputManager_KeyPressAndRelease"
+    "InputManager_MouseCoords"
+    "ScreenList_Navigation"
+    "IOManager_ReadFileToBuffer"
+)
+
+if(TARGET Box2D_v231)
+    list(APPEND TEST_CASES
+        "LevelReaderWriter_RoundTripText"
+        "LevelReaderWriter_LoadShippedLevel"
+        "Shader_TextureShadingCompileAndLink"
+        "Shader_LightShadingCompileAndLink"
+        "Shader_ColorCompileAndLink"
+        "SpriteFont_InitAndMeasure"
+        "SpriteFont_TextureAtlasNoSkewRegression"
+    )
+endif()
+
+foreach(TC ${TEST_CASES})
+    add_test(NAME "Engine.${TC}" COMMAND EngineTests "${TC}")
+    set_tests_properties("Engine.${TC}" PROPERTIES WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/bin/EngineTests")
+endforeach()

@@ -53,11 +53,22 @@ cmake --build build
 ```
 
 ### Running the Games
-From your host terminal (or inside `distrobox enter gamedev-ubuntu`):
+Run any game directly from your host terminal using the included helper scripts:
 ```bash
-distrobox enter gamedev-ubuntu -- bash -c 'cd build/bin/TutorialGame && ./TutorialGame'
-distrobox enter gamedev-ubuntu -- bash -c 'cd build/bin/ZombieGame && ./ZombieGame'
-distrobox enter gamedev-ubuntu -- bash -c 'cd build/bin/BallGame && ./BallGame'
-distrobox enter gamedev-ubuntu -- bash -c 'cd build/bin/NinjaPlatformer && ./NinjaPlatformer'
+./run-ninja.sh      # Tutorials 44-58: NinjaPlatformer (Box2D, Lights, CEGUI)
+./run-zombie.sh     # Tutorials 18-38: ZombieGame (AI, Audio, Levels)
+./run-ball.sh       # Tutorials 39-43: BallGame (Spatial grid & renderers)
+./run-tutorial.sh   # Tutorials 1-17:  TutorialGame (Basic 2D engine)
+```
+
+Alternatively, use the interactive launcher:
+```bash
+./run.sh            # Interactive menu, or pass target: ./run.sh ninja
+```
+
+### Running Automated Tests
+Run the 16 automated tests directly from your host terminal:
+```bash
+./run-tests.sh      # (or ./run.sh tests)
 ```
 
