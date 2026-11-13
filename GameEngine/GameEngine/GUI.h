@@ -1,10 +1,13 @@
 #pragma once
 
-#include <CEGUI/CEGUI.h>
-#include <CEGUI/RendererModules/OpenGL/GL3Renderer.h>
 #include <glm/glm.hpp>
 #include <SDL_events.h>
 #include <string>
+
+#ifdef GAMEENGINE_HAS_CEGUI
+
+#include <CEGUI/CEGUI.h>
+#include <CEGUI/RendererModules/OpenGL/GL3Renderer.h>
 
 namespace GameEngine {
 	class GUI {
@@ -20,6 +23,7 @@ namespace GameEngine {
 		void hideMouseCursor();
 
 		void onSDLEvent(SDL_Event& evnt);
+		void onWindowResize(int width, int height);
 
 		void loadScheme(const std::string& schemeFile);
 		void setFont(const std::string& fontFile);
@@ -37,3 +41,28 @@ namespace GameEngine {
 		unsigned int m_lastTime = 0;
 	};
 }
+
+#else
+
+namespace GameEngine {
+	class GUI {
+	public:
+		void init(const std::string& /*resourceDirectory*/) {}
+		void destroy() {}
+
+		void draw() {}
+		void update() {}
+
+		void setMouseCursor(const std::string& /*imageFile*/) {}
+		void showMouseCursor() {}
+		void hideMouseCursor() {}
+
+		void onSDLEvent(SDL_Event& /*evnt*/) {}
+		void onWindowResize(int /*width*/, int /*height*/) {}
+
+		void loadScheme(const std::string& /*schemeFile*/) {}
+		void setFont(const std::string& /*fontFile*/) {}
+	};
+}
+
+#endif

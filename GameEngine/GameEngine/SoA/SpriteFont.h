@@ -53,7 +53,7 @@ namespace GameEngine {
 
     class SpriteFont {
     public:
-        SpriteFont() {}
+        SpriteFont() : m_regStart(0), m_regLength(0), m_glyphs(nullptr), m_fontHeight(0), m_texID(0) {}
         SpriteFont(const char* font, int size, char cs, char ce);
         SpriteFont(const char* font, int size) :
             SpriteFont(font, size, FIRST_PRINTABLE_CHAR, LAST_PRINTABLE_CHAR) {

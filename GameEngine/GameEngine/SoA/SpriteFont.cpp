@@ -33,7 +33,8 @@ namespace GameEngine {
         if (!TTF_WasInit()) {
             TTF_Init();
         }
-        TTF_Font* f = TTF_OpenFont(font, size);
+        SDL_RWops* rw = SDL_RWFromFile(font, "rb");
+        TTF_Font* f = (rw != nullptr) ? TTF_OpenFontRW(rw, 1, size) : TTF_OpenFont(font, size);
         if (f == nullptr) {
             fprintf(stderr, "Failed to open TTF font %s\n", font);
             fflush(stderr);
@@ -127,15 +128,15 @@ namespace GameEngine {
                         const unsigned char* sp = srcRow + x * 4;
                         unsigned char* dp = dstRow + x * 4;
                         float a = sp[3] / 255.0f;
-                        dp[0] = (unsigned char)((float)sp[0] * a);
+                        dp[0] = (unsigned char)((float)sp[2] * a);
                         dp[1] = (unsigned char)((float)sp[1] * a);
-                        dp[2] = (unsigned char)((float)sp[2] * a);
+                        dp[2] = (unsigned char)((float)sp[0] * a);
                         dp[3] = sp[3];
                     }
                 }
 
                 // Save glyph image and update coordinates
-                glTexSubImage2D(GL_TEXTURE_2D, 0, lx, bestHeight - ly - 1 - glyphSurface->h, glyphSurface->w, glyphSurface->h, GL_BGRA, GL_UNSIGNED_BYTE, packedPixels.data());
+                glTexSubImage2D(GL_TEXTURE_2D, 0, lx, bestHeight - ly - 1 - glyphSurface->h, glyphSurface->w, glyphSurface->h, GL_RGBA, GL_UNSIGNED_BYTE, packedPixels.data());
                 glyphRects[gi].x = lx;
                 glyphRects[gi].y = ly;
                 glyphRects[gi].z = glyphSurface->w;
@@ -188,7 +189,12 @@ namespace GameEngine {
     }
     void SpriteFont::dispose() {
         if (m_texID != 0) {
-            glDeleteTextures(1, &m_texID);
+#ifndef __ANDROID__
+            if (glDeleteTextures != nullptr)
+#endif
+            {
+                glDeleteTextures(1, &m_texID);
+            }
             m_texID = 0;
         }
         if (m_glyphs) {

@@ -18,7 +18,10 @@ const float MAX_DELTA_TIME = 1.0f; // Maximum size of deltaTime
 
 MainGame::~MainGame()
 {
-
+    m_virtualControls.dispose();
+    if (m_spriteFont) {
+        m_spriteFont->dispose();
+    }
 }
 
 void MainGame::run() {
@@ -56,6 +59,7 @@ void MainGame::run() {
         }
 
         m_camera.Update();
+        m_hudCamera.Update();
         draw();
         m_fps = m_fpsLimiter.end();
     }
@@ -68,10 +72,14 @@ void MainGame::init() {
     m_screenHeight = 1080;
 
     m_window.Create("Ball Game", m_screenWidth, m_screenHeight, 0);
+    m_screenWidth = m_window.GetScreenWidth();
+    m_screenHeight = m_window.GetScreenHeight();
     glClearColor(0.0, 0.0, 0.0, 1.0);
     m_camera.Init(m_screenWidth, m_screenHeight);
     // Point the camera to the center of the screen
     m_camera.SetPosition(glm::vec2(m_screenWidth / 2.0f, m_screenHeight / 2.0f));
+    m_hudCamera.Init(m_screenWidth, m_screenHeight);
+    m_hudCamera.SetPosition(glm::vec2(m_screenWidth / 2.0f, m_screenHeight / 2.0f));
     
     m_spriteBatch.init();
     // Initialize sprite font
@@ -87,12 +95,14 @@ void MainGame::init() {
     m_fpsLimiter.setMaxFPS(60.0f);
 
     initRenderers();
+    m_virtualControls.init(GameEngine::VirtualControlLayout::BALL_SANDBOX);
 }
 
 void MainGame::initRenderers() {
     m_ballRenderers.push_back(std::make_unique<BallRenderer>());
     m_ballRenderers.push_back(std::make_unique<MomentumBallRenderer>());
     m_ballRenderers.push_back(std::make_unique<VelocityBallRenderer>(m_screenWidth, m_screenHeight));
+    m_ballRenderers.push_back(std::make_unique<PositionBallRenderer>(m_screenWidth, m_screenHeight));
     m_ballRenderers.push_back(std::make_unique<TrippyBallRenderer>(m_screenWidth, m_screenHeight));
 }
 
@@ -205,7 +215,11 @@ void MainGame::update(float deltaTime) {
 
 void MainGame::draw() {
     // Set the base depth to 1.0
+#ifdef __ANDROID__
+    glClearDepthf(1.0f);
+#else
     glClearDepth(1.0);
+#endif
     // Clear the colour and depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -222,8 +236,9 @@ void MainGame::draw() {
     GLint textureUniform = m_textureProgram.GetUniformLocation("mySampler");
     glUniform1i(textureUniform, 0);
 
+    glm::mat4 hudMatrix = m_hudCamera.getCameraMatrix();
     GLint pUniform = m_textureProgram.GetUniformLocation("P");
-    glUniformMatrix4fv(pUniform, 1, GL_FALSE, &projectionMatrix[0][0]);
+    glUniformMatrix4fv(pUniform, 1, GL_FALSE, &hudMatrix[0][0]);
 
     drawHud();
 
@@ -236,11 +251,12 @@ void MainGame::drawHud() {
     const GameEngine::ColourRGBA8 fontColour(255, 0, 0, 255);
     // Convert float to char *
     char buffer[64];
-    sprintf(buffer, "%.1f", m_fps);
+    snprintf(buffer, sizeof(buffer), "%.1f", m_fps);
 
     m_spriteBatch.begin();
     m_spriteFont->draw(m_spriteBatch, buffer, glm::vec2(0.0f, m_screenHeight - 32.0f),
                        glm::vec2(1.0f), 0.0f, fontColour);
+    m_virtualControls.draw(m_spriteBatch, m_screenWidth, m_screenHeight, m_spriteFont.get());
     m_spriteBatch.end();
     m_spriteBatch.renderBatch();
 }
@@ -252,28 +268,97 @@ void MainGame::processInput() {
     SDL_Event evnt;
     //Will keep looping until there are no more events to process
     while (SDL_PollEvent(&evnt)) {
+        if (m_virtualControls.onSDLEvent(evnt, m_inputManager, m_screenWidth, m_screenHeight)) {
+            continue;
+        }
         switch (evnt.type) {
             case SDL_QUIT:
                 m_gameState = GameState::EXIT;
                 break;
-            case SDL_MOUSEMOTION:
-                m_ballController.onMouseMove(m_balls, (float)evnt.motion.x, (float)m_screenHeight - (float)evnt.motion.y);
+            case SDL_WINDOWEVENT:
+                if (evnt.window.event == SDL_WINDOWEVENT_RESIZED || evnt.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+                    m_window.OnResize(evnt.window.data1, evnt.window.data2);
+                    m_screenWidth = m_window.GetScreenWidth();
+                    m_screenHeight = m_window.GetScreenHeight();
+                    m_camera.Resize(m_screenWidth, m_screenHeight);
+                    m_camera.SetPosition(glm::vec2(m_screenWidth / 2.0f, m_screenHeight / 2.0f));
+                    m_hudCamera.Resize(m_screenWidth, m_screenHeight);
+                    m_hudCamera.SetPosition(glm::vec2(m_screenWidth / 2.0f, m_screenHeight / 2.0f));
+                    for (auto& renderer : m_ballRenderers) {
+                        renderer->onResize(m_screenWidth, m_screenHeight);
+                    }
+                    m_grid = std::make_unique<Grid>(m_screenWidth, m_screenHeight, CELL_SIZE);
+                    for (auto& ball : m_balls) {
+                        ball.ownerCell = nullptr;
+                        ball.cellVectorIndex = -1;
+                        m_grid->addBall(&ball);
+                    }
+                }
+                break;
+            case SDL_MOUSEMOTION: {
+                glm::vec2 worldPos = m_camera.convertScreenToWorld(glm::vec2((float)evnt.motion.x, (float)evnt.motion.y));
+                m_ballController.onMouseMove(m_balls, worldPos.x, worldPos.y);
                 m_inputManager.setMouseCoords((float)evnt.motion.x, (float)evnt.motion.y);
                 break;
+            }
             case SDL_KEYDOWN:
                 m_inputManager.pressKey(evnt.key.keysym.sym);
                 break;
             case SDL_KEYUP:
                 m_inputManager.releaseKey(evnt.key.keysym.sym);
                 break;
-            case SDL_MOUSEBUTTONDOWN:
-                m_ballController.onMouseDown(m_balls, (float)evnt.button.x, (float)m_screenHeight - (float)evnt.button.y);
+            case SDL_MOUSEBUTTONDOWN: {
+                glm::vec2 worldPos = m_camera.convertScreenToWorld(glm::vec2((float)evnt.button.x, (float)evnt.button.y));
+                m_ballController.onMouseDown(m_balls, worldPos.x, worldPos.y);
                 m_inputManager.pressKey(evnt.button.button);
                 break;
+            }
             case SDL_MOUSEBUTTONUP:
                 m_ballController.onMouseUp(m_balls);
                 m_inputManager.releaseKey(evnt.button.button);
                 break;
+            case SDL_FINGERDOWN: {
+                m_inputManager.onTouchDown(evnt.tfinger.fingerId, evnt.tfinger.x, evnt.tfinger.y,
+                                           (float)m_screenWidth, (float)m_screenHeight);
+                if (m_inputManager.getActiveFingers().size() >= 2) {
+                    m_ballController.onMouseUp(m_balls);
+                } else {
+                    glm::vec2 worldPos = m_camera.convertScreenToWorld(
+                        glm::vec2(evnt.tfinger.x * m_screenWidth, evnt.tfinger.y * m_screenHeight));
+                    m_ballController.onMouseDown(m_balls, worldPos.x, worldPos.y);
+                }
+                break;
+            }
+            case SDL_FINGERUP:
+                m_inputManager.onTouchUp(evnt.tfinger.fingerId, evnt.tfinger.x, evnt.tfinger.y,
+                                         (float)m_screenWidth, (float)m_screenHeight);
+                if (m_inputManager.getActiveFingers().empty()) {
+                    m_ballController.onMouseUp(m_balls);
+                }
+                break;
+            case SDL_FINGERMOTION: {
+                m_inputManager.onTouchMotion(evnt.tfinger.fingerId, evnt.tfinger.x, evnt.tfinger.y,
+                                             evnt.tfinger.dx, evnt.tfinger.dy,
+                                             (float)m_screenWidth, (float)m_screenHeight);
+                if (m_inputManager.getActiveFingers().size() == 1) {
+                    glm::vec2 worldPos = m_camera.convertScreenToWorld(
+                        glm::vec2(evnt.tfinger.x * m_screenWidth, evnt.tfinger.y * m_screenHeight));
+                    m_ballController.onMouseMove(m_balls, worldPos.x, worldPos.y);
+                }
+                break;
+            }
+        }
+    }
+
+    m_virtualControls.update(m_inputManager, m_screenWidth, m_screenHeight);
+
+    float pinchDelta = m_inputManager.getPinchDelta();
+    if (pinchDelta != 0.0f) {
+        m_camera.OffsetScale(pinchDelta * 2.0f);
+        if (m_camera.GetScale() < 0.25f) {
+            m_camera.SetScale(0.25f);
+        } else if (m_camera.GetScale() > 4.0f) {
+            m_camera.SetScale(4.0f);
         }
     }
 

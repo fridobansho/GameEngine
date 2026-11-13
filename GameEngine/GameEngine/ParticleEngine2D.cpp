@@ -11,10 +11,6 @@ namespace GameEngine
 
 	ParticleEngine2D::~ParticleEngine2D()
 	{
-		for (auto& b : m_batches)
-		{
-			delete b;
-		}
 	}
 
 	void ParticleEngine2D::addParticleBatch(ParticleBatch2D * particleBatch)

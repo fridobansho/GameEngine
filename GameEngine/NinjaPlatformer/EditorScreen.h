@@ -12,11 +12,11 @@
 #include <GameEngine/SpriteBatch.h>
 #include <GameEngine/SoA/SpriteFont.h>
 #include <GameEngine/Window.h>
+#include <GameEngine/GUI.h>
 #include <vector>
 #include <string>
 #include <cstddef>
-
-#include <GameEngine/GUI.h>
+#include <memory>
 
 #include "ScreenIndices.h"
 
@@ -40,6 +40,7 @@ enum class SelectionMode {
 const int NO_BOX = -1;
 const int NO_LIGHT = -1;
 
+#ifdef GAMEENGINE_HAS_CEGUI
 class WidgetLabel {
 public:
 	WidgetLabel() {}
@@ -54,6 +55,7 @@ public:
 	GameEngine::ColourRGBA8 colour = GameEngine::ColourRGBA8(255, 255, 255, 255);
 	float scale = 0.7f;
 };
+#endif
 
 class EditorScreen : public GameEngine::IGameScreen {
 public:
@@ -92,6 +94,7 @@ private:
 	void setPlatformWidgetVisibility(bool visible);
 	void setLightWidgetVisibility(bool visible);
 
+#ifdef GAMEENGINE_HAS_CEGUI
 	/************************************************************************/
 	/* Event Handlers                                                       */
 	/************************************************************************/
@@ -120,6 +123,29 @@ private:
 	bool onSave(const CEGUI::EventArgs& e);
 	bool onLoadCancelClick(const CEGUI::EventArgs& e);
 	bool onLoad(const CEGUI::EventArgs& e);
+#else
+	enum class ToolbarAction {
+		SELECT_MODE,
+		PLACE_MODE,
+		OBJECT_PLAYER,
+		OBJECT_PLATFORM,
+		OBJECT_FINISH,
+		OBJECT_LIGHT,
+		TOGGLE_PHYSICS,
+		TOGGLE_DEBUG,
+		SAVE_LEVEL,
+		LOAD_LEVEL,
+		BACK
+	};
+	struct FallbackButton {
+		ToolbarAction action;
+		std::string label;
+		glm::vec4 rect; // UI camera coordinates
+	};
+	std::vector<FallbackButton> buildFallbackToolbar() const;
+	bool handleFallbackToolbarClick(float screenX, float screenY);
+	void drawFallbackToolbar();
+#endif
 
 	/************************************************************************/
 	/* Member Variables                                                     */
@@ -131,9 +157,10 @@ private:
 	float m_rotation = 0.0f;
 	float m_lightSize = 10.0f;
 	glm::vec2 m_boxDims = glm::vec2(1.0f);
-	bool m_mouseButtons[2];
+	bool m_mouseButtons[2] = { false, false };
 	bool m_debugRender = false;
 
+#ifdef GAMEENGINE_HAS_CEGUI
 	CEGUI::GroupBox* m_groupBox = nullptr;
 	CEGUI::Slider* m_rSlider = nullptr;
 	CEGUI::Slider* m_gSlider = nullptr;
@@ -164,6 +191,9 @@ private:
 	CEGUI::PushButton* m_loadButton = nullptr;
 	CEGUI::PushButton* m_backButton = nullptr;
 	std::vector<WidgetLabel> m_widgetLabels;
+#else
+	std::string m_statusMessage;
+#endif
 
 	GameEngine::SpriteBatch m_spriteBatch;
 	GameEngine::SpriteFont m_spriteFont;
@@ -186,7 +216,7 @@ private:
 	int m_selectedBox = NO_BOX;
 	int m_selectedLight = NO_LIGHT;
 	bool m_isDragging = false;
-	glm::vec2 m_selectOffset;
+	glm::vec2 m_selectOffset = glm::vec2(0.0f);
 
 	GameEngine::Camera2D m_camera;
 	GameEngine::Camera2D m_uiCamera;

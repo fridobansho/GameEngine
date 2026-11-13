@@ -1,7 +1,11 @@
 #pragma once
 
 #include <SDL.h>
+#ifdef __ANDROID__
+#include <GLES3/gl3.h>
+#else
 #include <GL/glew.h>
+#endif
 #include <vector>
 
 #include <GameEngine/GLSLProgram.h>
@@ -12,6 +16,7 @@
 #include <GameEngine/SpriteBatch.h>
 #include <GameEngine/InputManager.h>
 #include <GameEngine/Timing.h>
+#include <GameEngine/VirtualControls.h>
 
 #include "Bullet.h"
 
@@ -42,8 +47,10 @@ private:
 	GameState m_gameState;
 	GameEngine::GLSLProgram m_colourProgram;
 	GameEngine::Camera2D m_camera;
+	GameEngine::Camera2D m_hudCamera;
 	GameEngine::SpriteBatch m_spriteBatch;
 	GameEngine::InputManager m_inputManager;
+	GameEngine::VirtualControls m_virtualControls;
 	GameEngine::FPSLimiter m_fpsLimiter;
 
 	std::vector<Bullet> m_bullets;

@@ -16,6 +16,8 @@ namespace GameEngine
 
 		void addParticleBatch(ParticleBatch2D* particleBatch);
 
+		void clear() { m_batches.clear(); }
+
 		void update(float deltaTime);
 
 		void draw(SpriteBatch* spriteBatch);

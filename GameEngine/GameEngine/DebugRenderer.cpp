@@ -196,13 +196,32 @@ void GameEngine::DebugRenderer::render(const glm::mat4& projectionMatrix, float 
 
 void GameEngine::DebugRenderer::dispose() {
 	if (m_vao) {
-		glDeleteVertexArrays(1, &m_vao);
+#ifndef __ANDROID__
+		if (glDeleteVertexArrays != nullptr)
+#endif
+		{
+			glDeleteVertexArrays(1, &m_vao);
+		}
+		m_vao = 0;
 	}
 	if (m_vbo) {
-		glDeleteBuffers(1, &m_vbo);
+#ifndef __ANDROID__
+		if (glDeleteBuffers != nullptr)
+#endif
+		{
+			glDeleteBuffers(1, &m_vbo);
+		}
+		m_vbo = 0;
 	}
 	if (m_ibo) {
-		glDeleteBuffers(1, &m_ibo);
+#ifndef __ANDROID__
+		if (glDeleteBuffers != nullptr)
+#endif
+		{
+			glDeleteBuffers(1, &m_ibo);
+		}
+		m_ibo = 0;
 	}
+	m_numElements = 0;
 	m_program.Dispose();
 }

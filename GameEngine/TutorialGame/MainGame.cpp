@@ -23,6 +23,7 @@ MainGame::MainGame() :
 
 MainGame::~MainGame()
 {
+	m_virtualControls.dispose();
 }
 
 void MainGame::Run()
@@ -37,12 +38,19 @@ void MainGame::InitSystems()
 	GameEngine::Init();
 
 	m_window.Create("Game Engine", m_screenWidth, m_screenHeight, 0U);
+	m_screenWidth = m_window.GetScreenWidth();
+	m_screenHeight = m_window.GetScreenHeight();
+	m_camera.Init(m_screenWidth, m_screenHeight);
+	m_hudCamera.Init(m_screenWidth, m_screenHeight);
+	m_hudCamera.SetPosition(glm::vec2(m_screenWidth / 2.0f, m_screenHeight / 2.0f));
 
 	InitShaders();
 
 	m_spriteBatch.init();
 
 	m_fpsLimiter.init(m_maxFPS);
+
+	m_virtualControls.init(GameEngine::VirtualControlLayout::SANDBOX_CAMERA);
 }
 
 void MainGame::InitShaders()
@@ -63,6 +71,7 @@ void MainGame::GameLoop()
 		_time += 0.01f;
 
 		m_camera.Update();
+		m_hudCamera.Update();
 
 		for (size_t i = 0; i < m_bullets.size();)
 		{
@@ -92,6 +101,8 @@ void MainGame::GameLoop()
 
 void MainGame::ProcessInput()
 {
+	m_inputManager.update();
+
 	SDL_Event event;
 
 	const float CAMERA_SPEED = 2.0f;
@@ -99,10 +110,25 @@ void MainGame::ProcessInput()
 
 	while (SDL_PollEvent(&event))
 	{
+		if (m_virtualControls.onSDLEvent(event, m_inputManager, m_screenWidth, m_screenHeight))
+		{
+			continue;
+		}
 		switch (event.type)
 		{
 		case SDL_QUIT:
 			m_gameState = GameState::EXIT;
+			break;
+		case SDL_WINDOWEVENT:
+			if (event.window.event == SDL_WINDOWEVENT_RESIZED || event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+			{
+				m_window.OnResize(event.window.data1, event.window.data2);
+				m_screenWidth = m_window.GetScreenWidth();
+				m_screenHeight = m_window.GetScreenHeight();
+				m_camera.Resize(m_screenWidth, m_screenHeight);
+				m_hudCamera.Resize(m_screenWidth, m_screenHeight);
+				m_hudCamera.SetPosition(glm::vec2(m_screenWidth / 2.0f, m_screenHeight / 2.0f));
+			}
 			break;
 		case SDL_MOUSEMOTION:
 			m_inputManager.setMouseCoords((float)event.motion.x, (float)event.motion.y);
@@ -119,10 +145,30 @@ void MainGame::ProcessInput()
 		case SDL_MOUSEBUTTONUP:
 			m_inputManager.releaseKey(event.button.button);
 			break;
+		case SDL_FINGERDOWN:
+			m_inputManager.onTouchDown(event.tfinger.fingerId, event.tfinger.x, event.tfinger.y,
+				(float)m_screenWidth, (float)m_screenHeight);
+			break;
+		case SDL_FINGERUP:
+			m_inputManager.onTouchUp(event.tfinger.fingerId, event.tfinger.x, event.tfinger.y,
+				(float)m_screenWidth, (float)m_screenHeight);
+			break;
+		case SDL_FINGERMOTION:
+			m_inputManager.onTouchMotion(event.tfinger.fingerId, event.tfinger.x, event.tfinger.y,
+				event.tfinger.dx, event.tfinger.dy,
+				(float)m_screenWidth, (float)m_screenHeight);
+			break;
 		}
 	}
 
-	if(m_inputManager.isKeyDown(SDLK_w))
+	m_virtualControls.update(m_inputManager, m_screenWidth, m_screenHeight);
+
+	if (m_inputManager.isKeyPressed(SDLK_ESCAPE))
+	{
+		m_gameState = GameState::EXIT;
+	}
+
+	if (m_inputManager.isKeyDown(SDLK_w))
 		m_camera.SetPosition(m_camera.GetPosition() + glm::vec2(0.0f, CAMERA_SPEED));
 
 	if (m_inputManager.isKeyDown(SDLK_s))
@@ -135,12 +181,18 @@ void MainGame::ProcessInput()
 		m_camera.SetPosition(m_camera.GetPosition() + glm::vec2(CAMERA_SPEED, 0.0f));
 
 	if (m_inputManager.isKeyDown(SDLK_q))
-		m_camera.SetScale(m_camera.GetScale() + SCALE_SPEED);
+		m_camera.OffsetScale(SCALE_SPEED);
 
 	if (m_inputManager.isKeyDown(SDLK_e))
-		m_camera.SetScale(m_camera.GetScale() - SCALE_SPEED);
+		m_camera.OffsetScale(-SCALE_SPEED);
 
-	if (m_inputManager.isKeyDown(SDL_BUTTON_LEFT))
+	float pinchDelta = m_inputManager.getPinchDelta();
+	if (pinchDelta != 0.0f)
+	{
+		m_camera.OffsetScale(pinchDelta * 2.0f);
+	}
+
+	if (m_inputManager.isKeyDown(SDL_BUTTON_LEFT) && m_inputManager.getActiveFingers().size() <= 1)
 	{
 		glm::vec2 mouseCoords = m_inputManager.getMouseCoords();
 		mouseCoords = m_camera.convertScreenToWorld(mouseCoords);
@@ -148,16 +200,21 @@ void MainGame::ProcessInput()
 		glm::vec2 playerPosition(0.0f);
 
 		glm::vec2 direction = mouseCoords - playerPosition;
-
-		direction = glm::normalize(direction);
-
-		m_bullets.emplace_back(playerPosition, direction, 5.00f, 1000);
+		if (glm::length(direction) > 0.0001f)
+		{
+			direction = glm::normalize(direction);
+			m_bullets.emplace_back(playerPosition, direction, 5.00f, 1000);
+		}
 	}
 }
 
 void MainGame::DrawGame()
 {
+#ifdef __ANDROID__
+	glClearDepthf(1.0f);
+#else
 	glClearDepth(1.0);
+#endif
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	m_colourProgram.Use();
@@ -189,6 +246,14 @@ void MainGame::DrawGame()
 
 	m_spriteBatch.end();
 
+	m_spriteBatch.renderBatch();
+
+	glm::mat4 hudMatrix = m_hudCamera.getCameraMatrix();
+	glUniformMatrix4fv(pLocation, 1, GL_FALSE, &(hudMatrix[0][0]));
+
+	m_spriteBatch.begin();
+	m_virtualControls.draw(m_spriteBatch, m_screenWidth, m_screenHeight);
+	m_spriteBatch.end();
 	m_spriteBatch.renderBatch();
 
 	glBindTexture(GL_TEXTURE_2D, 0);

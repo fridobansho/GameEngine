@@ -11,6 +11,7 @@ namespace GameEngine
 		~Camera2D();
 
 		void Init(int, int);
+		void Resize(int screenWidth, int screenHeight) { Init(screenWidth, screenHeight); }
 		void Update();
 
 		bool isBoxInView(const glm::vec2& position, const glm::vec2& dimensions);
@@ -27,6 +28,8 @@ namespace GameEngine
 		float GetScale() const { return m_scale; }
 		const glm::mat4& getCameraMatrix() const { return m_cameraMatrix; }
 		float getAspectRatio() const { return (float)m_screenWidth / (float)m_screenHeight; }
+		int GetScreenWidth() const { return m_screenWidth; }
+		int GetScreenHeight() const { return m_screenHeight; }
 
 	private:
 		int m_screenWidth = 500;

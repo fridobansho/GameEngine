@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 #include <glm/glm.hpp>
 #include <GameEngine/SpriteBatch.h>
 
@@ -18,8 +19,8 @@ public:
 	virtual ~Agent();
 
 	virtual void update(const std::vector<std::string>& levelData,
-		std::vector<Human*>& humans,
-		std::vector<Zombie*>& zombies,
+		std::vector<std::unique_ptr<Human>>& humans,
+		std::vector<std::unique_ptr<Zombie>>& zombies,
 		float deltaTime) = 0;
 
 	bool collideWithLevel(const std::vector<std::string>& levelData);

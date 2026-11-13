@@ -1,6 +1,7 @@
 #define _USE_MATH_DEFINES
 #include "EditorScreen.h"
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <GameEngine/ResourceManager.h>
@@ -17,6 +18,13 @@ const float LIGHT_SELECT_RADIUS = 0.5f;
 
 const b2Vec2 GRAVITY(0.0f, -25.0);
 
+namespace {
+	bool endsWithBin(const std::string& path) {
+		return path.size() >= 4 && path.compare(path.size() - 4, 4, ".bin") == 0;
+	}
+}
+
+#ifdef GAMEENGINE_HAS_CEGUI
 void WidgetLabel::draw(GameEngine::SpriteBatch& sb, GameEngine::SpriteFont& sf, GameEngine::Window* w) {
 	if (!widget->isVisible()) return;
 	glm::vec2 pos;
@@ -25,6 +33,7 @@ void WidgetLabel::draw(GameEngine::SpriteBatch& sb, GameEngine::SpriteFont& sf, 
 	pos.y = w->GetScreenHeight() / 2.0f - widget->getYPosition().d_scale * w->GetScreenHeight();
 	sf.draw(sb, text.c_str(), pos, glm::vec2(scale), 0.0f, colour, GameEngine::Justification::MIDDLE);
 }
+#endif
 
 EditorScreen::EditorScreen(GameEngine::Window* window) :
 	m_window(window) {
@@ -88,7 +97,7 @@ void EditorScreen::onEntry() {
 }
 
 void EditorScreen::onExit() {
-
+#ifdef GAMEENGINE_HAS_CEGUI
 	for (auto& item : m_saveListBoxItems) {
 		// We don't have to call delete since removeItem does it for us
 		m_saveWindowCombobox->removeItem(item);
@@ -99,13 +108,21 @@ void EditorScreen::onExit() {
 		m_loadWindowCombobox->removeItem(item);
 	}
 	m_loadListBoxItems.clear();
+	m_widgetLabels.clear();
+#endif
 
 	m_textureProgram.Dispose();
+	m_lightProgram.Dispose();
+	m_debugRenderer.dispose();
 	m_spriteFont.dispose();
 	m_spriteBatch.dispose();
-	m_widgetLabels.clear();
 
-	clearLevel();
+	m_boxes.clear();
+	m_lights.clear();
+	m_hasPlayer = false;
+	m_selectedBox = NO_BOX;
+	m_selectedLight = NO_LIGHT;
+	m_isDragging = false;
 	m_world.reset();
 
 	m_gui.destroy();
@@ -117,50 +134,106 @@ void EditorScreen::update() {
 
 	checkInput();
 
-	// Platform scaling and rotation from keypress
-	if ((m_objectMode == ObjectMode::PLATFORM && m_selectMode == SelectionMode::PLACE) || m_selectedBox != NO_BOX) {
-		const double SCALE_SPEED = 0.01;
-		const double ROT_SPEED = 0.01;
-		// The callbacks will set the member variables for m_boxDims, don't need to set here
+	// Platform / finish scaling and rotation from keypress
+	if (((m_objectMode == ObjectMode::PLATFORM || m_objectMode == ObjectMode::FINISH) && m_selectMode == SelectionMode::PLACE) || m_selectedBox != NO_BOX) {
+		const float SCALE_SPEED = 0.01f;
+		const float ROT_SPEED = 0.01f;
+		bool changed = false;
 		// Scale
 		if (m_inputManager.isKeyDown(SDLK_LEFT)) {
+#ifdef GAMEENGINE_HAS_CEGUI
 			m_widthSpinner->setCurrentValue(m_widthSpinner->getCurrentValue() - SCALE_SPEED);
+#else
+			m_boxDims.x = std::max(0.1f, m_boxDims.x - SCALE_SPEED);
+			changed = true;
+#endif
 		} else if (m_inputManager.isKeyDown(SDLK_RIGHT)) {
+#ifdef GAMEENGINE_HAS_CEGUI
 			m_widthSpinner->setCurrentValue(m_widthSpinner->getCurrentValue() + SCALE_SPEED);
+#else
+			m_boxDims.x += SCALE_SPEED;
+			changed = true;
+#endif
 		}
 		if (m_inputManager.isKeyDown(SDLK_DOWN)) {
+#ifdef GAMEENGINE_HAS_CEGUI
 			m_heightSpinner->setCurrentValue(m_heightSpinner->getCurrentValue() - SCALE_SPEED);
+#else
+			m_boxDims.y = std::max(0.1f, m_boxDims.y - SCALE_SPEED);
+			changed = true;
+#endif
 		} else if (m_inputManager.isKeyDown(SDLK_UP)) {
+#ifdef GAMEENGINE_HAS_CEGUI
 			m_heightSpinner->setCurrentValue(m_heightSpinner->getCurrentValue() + SCALE_SPEED);
+#else
+			m_boxDims.y += SCALE_SPEED;
+			changed = true;
+#endif
 		}
 		// Rotation
 		if (m_inputManager.isKeyDown(SDLK_e)) {
-			// Have to check wraparound
-			double newValue = m_rotationSpinner->getCurrentValue() - ROT_SPEED;
-			if (newValue < 0.0) newValue += M_PI * 2.0;
+			float newValue = m_rotation - ROT_SPEED;
+			if (newValue < 0.0f) newValue += static_cast<float>(M_PI * 2.0);
+#ifdef GAMEENGINE_HAS_CEGUI
 			m_rotationSpinner->setCurrentValue(newValue);
+#else
+			m_rotation = newValue;
+			changed = true;
+#endif
 		} else if (m_inputManager.isKeyDown(SDLK_q)) {
-			double newValue = m_rotationSpinner->getCurrentValue() + ROT_SPEED;
-			if (newValue > M_PI * 2.0) newValue -= M_PI * 2.0;
+			float newValue = m_rotation + ROT_SPEED;
+			if (newValue > static_cast<float>(M_PI * 2.0)) newValue -= static_cast<float>(M_PI * 2.0);
+#ifdef GAMEENGINE_HAS_CEGUI
 			m_rotationSpinner->setCurrentValue(newValue);
+#else
+			m_rotation = newValue;
+			changed = true;
+#endif
+		}
+		if (changed) {
+			refreshSelectedBox();
 		}
 	}
 
 	// Light scaling from keypress
 	if ((m_objectMode == ObjectMode::LIGHT && m_selectMode == SelectionMode::PLACE) || m_selectedLight != NO_LIGHT) {
-		const double SCALE_SPEED = 0.1;
+		const float SCALE_SPEED = 0.1f;
 		const float ALPHA_SPEED = 1.0f;
+		bool changed = false;
 		// Scaling
 		if (m_inputManager.isKeyDown(SDLK_LEFT)) {
+#ifdef GAMEENGINE_HAS_CEGUI
 			m_sizeSpinner->setCurrentValue(m_sizeSpinner->getCurrentValue() - SCALE_SPEED);
+#else
+			m_lightSize = std::max(0.5f, m_lightSize - SCALE_SPEED);
+			changed = true;
+#endif
 		} else if (m_inputManager.isKeyDown(SDLK_RIGHT)) {
+#ifdef GAMEENGINE_HAS_CEGUI
 			m_sizeSpinner->setCurrentValue(m_sizeSpinner->getCurrentValue() + SCALE_SPEED);
+#else
+			m_lightSize = std::min(100.0f, m_lightSize + SCALE_SPEED);
+			changed = true;
+#endif
 		}
 		// Light intensity
 		if (m_inputManager.isKeyDown(SDLK_DOWN)) {
+#ifdef GAMEENGINE_HAS_CEGUI
 			m_aSlider->setCurrentValue(m_aSlider->getCurrentValue() - ALPHA_SPEED);
+#else
+			m_colorPickerAlpha = std::max(0.0f, m_colorPickerAlpha - ALPHA_SPEED);
+			changed = true;
+#endif
 		} else if (m_inputManager.isKeyDown(SDLK_UP)) {
+#ifdef GAMEENGINE_HAS_CEGUI
 			m_aSlider->setCurrentValue(m_aSlider->getCurrentValue() + ALPHA_SPEED);
+#else
+			m_colorPickerAlpha = std::min(255.0f, m_colorPickerAlpha + ALPHA_SPEED);
+			changed = true;
+#endif
+		}
+		if (changed) {
+			refreshSelectedLight();
 		}
 	}
 
@@ -180,8 +253,8 @@ void EditorScreen::update() {
 }
 
 void EditorScreen::draw() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	drawWorld();
 	drawUI();
@@ -197,6 +270,10 @@ void EditorScreen::drawUI() {
 		// Draw the object placement outlines
 		if (m_objectMode == ObjectMode::PLATFORM) {
 			m_debugRenderer.drawBox(glm::vec4(pos - m_boxDims * 0.5f, m_boxDims), GameEngine::ColourRGBA8(255, 255, 255, 200), m_rotation);
+			m_debugRenderer.end();
+			m_debugRenderer.render(m_camera.getCameraMatrix(), 2.0f);
+		} else if (m_objectMode == ObjectMode::FINISH) {
+			m_debugRenderer.drawBox(glm::vec4(pos - m_boxDims * 0.5f, m_boxDims), GameEngine::ColourRGBA8(255, 215, 0, 220), m_rotation);
 			m_debugRenderer.end();
 			m_debugRenderer.render(m_camera.getCameraMatrix(), 2.0f);
 		} else if (m_objectMode == ObjectMode::LIGHT) {
@@ -252,6 +329,7 @@ void EditorScreen::drawUI() {
 		}
 	}
 
+#ifdef GAMEENGINE_HAS_CEGUI
 	m_textureProgram.Use();
 
 	// Camera matrix
@@ -291,6 +369,9 @@ void EditorScreen::drawUI() {
 	m_textureProgram.UnUse();
 
 	m_gui.draw();
+#else
+	drawFallbackToolbar();
+#endif
 }
 
 void EditorScreen::drawWorld() {
@@ -343,15 +424,16 @@ void EditorScreen::drawWorld() {
 	if (m_debugRender) {
 		// Player collision
 		if (m_hasPlayer) m_player.drawDebug(m_debugRenderer);
-		// Render dynamic box borders
+		// Render box borders (cyan for goal, green for dynamic, red for static)
 		glm::vec4 destRect;
 		for (auto& b : m_boxes) {
 			destRect.x = b.getBody()->GetPosition().x - b.getDimensions().x / 2.0f;
 			destRect.y = b.getBody()->GetPosition().y - b.getDimensions().y / 2.0f;
 			destRect.z = b.getDimensions().x;
 			destRect.w = b.getDimensions().y;
-			// Dynamic is green, static is red.
-			if (b.isDynamic()) {
+			if (b.isGoal()) {
+				m_debugRenderer.drawBox(destRect, GameEngine::ColourRGBA8(0, 255, 255, 255), b.getBody()->GetAngle());
+			} else if (b.isDynamic()) {
 				m_debugRenderer.drawBox(destRect, GameEngine::ColourRGBA8(0, 255, 0, 255), b.getBody()->GetAngle());
 			} else {
 				m_debugRenderer.drawBox(destRect, GameEngine::ColourRGBA8(255, 0, 0, 255), b.getBody()->GetAngle());
@@ -380,11 +462,15 @@ void EditorScreen::clearLevel() {
 	m_boxes.clear();
 	m_lights.clear();
 	m_hasPlayer = false;
+	m_selectedBox = NO_BOX;
+	m_selectedLight = NO_LIGHT;
+	m_isDragging = false;
 	m_world.reset();
 	m_world = std::make_unique<b2World>(GRAVITY);
 }
 
 void EditorScreen::initUI() {
+#ifdef GAMEENGINE_HAS_CEGUI
 	// Init the UI
 	m_gui.init("GUI");
 	m_gui.loadScheme("TaharezLook.scheme");
@@ -612,6 +698,10 @@ void EditorScreen::initUI() {
 	m_gui.setMouseCursor("TaharezLook/MouseArrow");
 	m_gui.showMouseCursor();
 	SDL_ShowCursor(0);
+#else
+	SDL_ShowCursor(1);
+	m_statusMessage = "Fallback Editor UI";
+#endif
 }
 
 void EditorScreen::checkInput() {
@@ -620,10 +710,21 @@ void EditorScreen::checkInput() {
 	m_inputManager.update();
 
 	while (SDL_PollEvent(&evnt)) {
+#ifdef GAMEENGINE_HAS_CEGUI
 		m_gui.onSDLEvent(evnt);
+#endif
 		switch (evnt.type) {
 			case SDL_QUIT:
-				onExitClicked(CEGUI::EventArgs());
+				m_currentState = GameEngine::ScreenState::EXIT_APPLICATION;
+				break;
+			case SDL_WINDOWEVENT:
+				if (evnt.window.event == SDL_WINDOWEVENT_RESIZED ||
+				    evnt.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+					m_window->OnResize(evnt.window.data1, evnt.window.data2);
+					m_camera.Resize(m_window->GetScreenWidth(), m_window->GetScreenHeight());
+					m_uiCamera.Resize(m_window->GetScreenWidth(), m_window->GetScreenHeight());
+					m_gui.onWindowResize(m_window->GetScreenWidth(), m_window->GetScreenHeight());
+				}
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 				updateMouseDown(evnt);
@@ -634,6 +735,32 @@ void EditorScreen::checkInput() {
 			case SDL_MOUSEMOTION:
 				updateMouseMotion(evnt);
 				break;
+			case SDL_FINGERDOWN: {
+				SDL_Event fakeMouse = {};
+				fakeMouse.type = SDL_MOUSEBUTTONDOWN;
+				fakeMouse.button.button = SDL_BUTTON_LEFT;
+				fakeMouse.button.x = static_cast<int>(evnt.tfinger.x * static_cast<float>(m_window->GetScreenWidth()));
+				fakeMouse.button.y = static_cast<int>(evnt.tfinger.y * static_cast<float>(m_window->GetScreenHeight()));
+				updateMouseDown(fakeMouse);
+				break;
+			}
+			case SDL_FINGERUP: {
+				SDL_Event fakeMouse = {};
+				fakeMouse.type = SDL_MOUSEBUTTONUP;
+				fakeMouse.button.button = SDL_BUTTON_LEFT;
+				updateMouseUp(fakeMouse);
+				break;
+			}
+			case SDL_FINGERMOTION: {
+				SDL_Event fakeMotion = {};
+				fakeMotion.type = SDL_MOUSEMOTION;
+				fakeMotion.motion.x = static_cast<int>(evnt.tfinger.x * static_cast<float>(m_window->GetScreenWidth()));
+				fakeMotion.motion.y = static_cast<int>(evnt.tfinger.y * static_cast<float>(m_window->GetScreenHeight()));
+				fakeMotion.motion.xrel = static_cast<int>(evnt.tfinger.dx * static_cast<float>(m_window->GetScreenWidth()));
+				fakeMotion.motion.yrel = static_cast<int>(evnt.tfinger.dy * static_cast<float>(m_window->GetScreenHeight()));
+				updateMouseMotion(fakeMotion);
+				break;
+			}
 			case SDL_MOUSEWHEEL:
 				// Linear scaling sucks for mouse wheel zoom so we multiply by GetScale() instead.
 				m_camera.OffsetScale(m_camera.GetScale() * evnt.wheel.y * 0.1f);
@@ -653,7 +780,7 @@ bool inLightSelect(const Light& l, const glm::vec2& pos) {
 }
 
 void EditorScreen::updateMouseDown(const SDL_Event& evnt) {
-	// Texture for boxes. Its here because lazy.
+	// Texture for boxes.
 	static GameEngine::GLTexture texture = GameEngine::ResourceManager::GetTexture("Assets/bricks_top.png");
 	glm::vec2 pos;
 	glm::vec4 uvRect;
@@ -661,6 +788,11 @@ void EditorScreen::updateMouseDown(const SDL_Event& evnt) {
 	switch (evnt.button.button) {
 	case SDL_BUTTON_LEFT:
 		m_mouseButtons[MOUSE_LEFT] = true;
+#ifndef GAMEENGINE_HAS_CEGUI
+		if (handleFallbackToolbarClick(static_cast<float>(evnt.button.x), static_cast<float>(evnt.button.y))) {
+			break;
+		}
+#endif
 		// Don't place objects or select things when clicking on UI.
 		if (isMouseInUI()) break;
 		if (m_selectMode == SelectionMode::SELECT) {
@@ -673,10 +805,10 @@ void EditorScreen::updateMouseDown(const SDL_Event& evnt) {
 			} else {
 				// Unselect
 				m_selectedLight = NO_LIGHT;
-				// Find the box that we are selecting
+				// Find the light that we are selecting
 				for (size_t i = 0; i < m_lights.size(); i++) {
 					if (inLightSelect(m_lights[i], pos)) {
-						m_selectedLight = i;
+						m_selectedLight = static_cast<int>(i);
 						break;
 					}
 				}
@@ -693,6 +825,7 @@ void EditorScreen::updateMouseDown(const SDL_Event& evnt) {
 				m_colorPickerBlue = m_lights[m_selectedLight].colour.b;
 				m_colorPickerAlpha = m_lights[m_selectedLight].colour.a;
 				m_lightSize = m_lights[m_selectedLight].size;
+#ifdef GAMEENGINE_HAS_CEGUI
 				// Set widget values
 				m_rSlider->setCurrentValue(m_lights[m_selectedLight].colour.r);
 				m_gSlider->setCurrentValue(m_lights[m_selectedLight].colour.g);
@@ -700,7 +833,10 @@ void EditorScreen::updateMouseDown(const SDL_Event& evnt) {
 				m_aSlider->setCurrentValue(m_lights[m_selectedLight].colour.a);
 				m_sizeSpinner->setCurrentValue(m_lights[m_selectedLight].size);
 				m_lightRadioButton->setSelected(true);
+#endif
 				m_objectMode = ObjectMode::LIGHT;
+				setPlatformWidgetVisibility(false);
+				setLightWidgetVisibility(true);
 				break;
 			}
 			// If a box is already selected, test to see if we just clicked it again
@@ -712,7 +848,7 @@ void EditorScreen::updateMouseDown(const SDL_Event& evnt) {
 				// Find the box that we are selecting
 				for (size_t i = 0; i < m_boxes.size(); i++) {
 					if (m_boxes[i].testPoint(pos.x, pos.y)) {
-						m_selectedBox = i;
+						m_selectedBox = static_cast<int>(i);
 						break;
 					}
 				}
@@ -729,6 +865,7 @@ void EditorScreen::updateMouseDown(const SDL_Event& evnt) {
 				m_colorPickerRed = m_boxes[m_selectedBox].getColour().r;
 				m_colorPickerGreen = m_boxes[m_selectedBox].getColour().g;
 				m_colorPickerBlue = m_boxes[m_selectedBox].getColour().b;
+#ifdef GAMEENGINE_HAS_CEGUI
 				// Set widget values
 				m_rotationSpinner->setCurrentValue(m_boxes[m_selectedBox].getBody()->GetAngle());
 				m_widthSpinner->setCurrentValue(m_boxes[m_selectedBox].getDimensions().x);
@@ -743,8 +880,24 @@ void EditorScreen::updateMouseDown(const SDL_Event& evnt) {
 					m_rigidRadioButton->setSelected(true);
 					m_physicsMode = PhysicsMode::RIGID;
 				}
-				m_platformRadioButton->setSelected(true);
-				m_objectMode = ObjectMode::PLATFORM;
+#else
+				m_physicsMode = m_boxes[m_selectedBox].isDynamic() ? PhysicsMode::DYNAMIC : PhysicsMode::RIGID;
+#endif
+				if (m_boxes[m_selectedBox].isGoal()) {
+#ifdef GAMEENGINE_HAS_CEGUI
+					m_finishRadioButton->setSelected(true);
+#endif
+					m_objectMode = ObjectMode::FINISH;
+					setPlatformWidgetVisibility(false);
+					setLightWidgetVisibility(false);
+				} else {
+#ifdef GAMEENGINE_HAS_CEGUI
+					m_platformRadioButton->setSelected(true);
+#endif
+					m_objectMode = ObjectMode::PLATFORM;
+					setPlatformWidgetVisibility(true);
+					setLightWidgetVisibility(false);
+				}
 			}
 		} else {
 			// Place mode
@@ -759,7 +912,7 @@ void EditorScreen::updateMouseDown(const SDL_Event& evnt) {
 				uvRect.z = m_boxDims.x;
 				uvRect.w = m_boxDims.y;
 				newBox.init(m_world.get(), pos, m_boxDims, texture, GameEngine::ColourRGBA8((GLubyte)m_colorPickerRed, (GLubyte)m_colorPickerGreen, (GLubyte)m_colorPickerBlue, 255),
-				            false, m_physicsMode == PhysicsMode::DYNAMIC, m_rotation, uvRect);
+				            false, m_physicsMode == PhysicsMode::DYNAMIC, m_rotation, uvRect, false);
 				m_boxes.push_back(newBox);
 				break;
 			case ObjectMode::PLAYER:
@@ -776,9 +929,18 @@ void EditorScreen::updateMouseDown(const SDL_Event& evnt) {
 				newLight.colour = GameEngine::ColourRGBA8((GLubyte)m_colorPickerRed, (GLubyte)m_colorPickerGreen, (GLubyte)m_colorPickerBlue, (GLubyte)m_colorPickerAlpha);
 				m_lights.push_back(newLight);
 				break;
-			case ObjectMode::FINISH:
-				// TODO: Implement
+			case ObjectMode::FINISH: {
+				pos = m_camera.convertScreenToWorld(glm::vec2(evnt.button.x, evnt.button.y));
+				GameEngine::ColourRGBA8 goalColour((GLubyte)m_colorPickerRed, (GLubyte)m_colorPickerGreen, (GLubyte)m_colorPickerBlue, 220);
+				if (goalColour.r == 255 && goalColour.g == 255 && goalColour.b == 255) {
+					// Default gold tint for placed goal zones
+					goalColour = GameEngine::ColourRGBA8(255, 215, 0, 220);
+				}
+				newBox.init(m_world.get(), pos, m_boxDims, m_blankTexture, goalColour,
+				            false, false, m_rotation, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), true);
+				m_boxes.push_back(newBox);
 				break;
+			}
 			}
 		}
 		break;
@@ -829,17 +991,26 @@ void EditorScreen::refreshSelectedBox() {
 
 void EditorScreen::refreshSelectedBox(const glm::vec2& newPosition) {
 	if (m_selectedBox == NO_BOX) return;
-	// Texture for boxes. Its here because lazy.
-	static GameEngine::GLTexture texture = GameEngine::ResourceManager::GetTexture("Assets/bricks_top.png");
-	glm::vec4 uvRect;
-	uvRect.x = newPosition.x;
-	uvRect.y = newPosition.y;
-	uvRect.z = m_boxDims.x;
-	uvRect.w = m_boxDims.y;
-	Box newBox;
+	const Box& oldBox = m_boxes[m_selectedBox];
+	const bool isGoal = oldBox.isGoal();
+	const GameEngine::GLTexture texture = oldBox.getTexture().id != 0
+		? oldBox.getTexture()
+		: GameEngine::ResourceManager::GetTexture("Assets/bricks_top.png");
 
-	newBox.init(m_world.get(), newPosition, m_boxDims, texture, GameEngine::ColourRGBA8((GLubyte)m_colorPickerRed, (GLubyte)m_colorPickerGreen, (GLubyte)m_colorPickerBlue, 255),
-	            false, m_physicsMode == PhysicsMode::DYNAMIC, m_rotation, uvRect);
+	glm::vec4 uvRect;
+	if (isGoal) {
+		uvRect = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+	} else {
+		uvRect.x = newPosition.x;
+		uvRect.y = newPosition.y;
+		uvRect.z = m_boxDims.x;
+		uvRect.w = m_boxDims.y;
+	}
+
+	Box newBox;
+	newBox.init(m_world.get(), newPosition, m_boxDims, texture,
+	            GameEngine::ColourRGBA8((GLubyte)m_colorPickerRed, (GLubyte)m_colorPickerGreen, (GLubyte)m_colorPickerBlue, isGoal ? oldBox.getColour().a : 255),
+	            false, isGoal ? false : (m_physicsMode == PhysicsMode::DYNAMIC), m_rotation, uvRect, isGoal);
 	// Destroy old box and replace with new one
 	m_boxes[m_selectedBox].destroy(m_world.get());
 	m_boxes[m_selectedBox] = newBox;
@@ -865,29 +1036,55 @@ bool EditorScreen::isMouseInUI() {
 	SDL_GetMouseState(&x, &y);
 	const float SW = (float)m_window->GetScreenWidth();
 	const float SH = (float)m_window->GetScreenHeight();
-	// First check save window
+#ifdef GAMEENGINE_HAS_CEGUI
+	// Check save window
 	if (!m_saveWindow->isDisabled() &&
-		x >= m_saveWindow->getXPosition().d_scale * SW && x <= m_saveWindow->getXPosition().d_scale * SW + m_saveWindow->getWidth().d_scale  * SW &&
+		x >= m_saveWindow->getXPosition().d_scale * SW && x <= m_saveWindow->getXPosition().d_scale * SW + m_saveWindow->getWidth().d_scale * SW &&
 		y >= m_saveWindow->getYPosition().d_scale * SH && y <= m_saveWindow->getYPosition().d_scale * SH + m_saveWindow->getHeight().d_scale * SH) return true;
 
+	// Check load window
+	if (!m_loadWindow->isDisabled() &&
+		x >= m_loadWindow->getXPosition().d_scale * SW && x <= m_loadWindow->getXPosition().d_scale * SW + m_loadWindow->getWidth().d_scale * SW &&
+		y >= m_loadWindow->getYPosition().d_scale * SH && y <= m_loadWindow->getYPosition().d_scale * SH + m_loadWindow->getHeight().d_scale * SH) return true;
+
 	// Notice we aren't converting to world space, we are staying in screen space because UI.
-	return (x >= m_groupBox->getXPosition().d_scale * SW && x <= m_groupBox->getXPosition().d_scale * SW + m_groupBox->getWidth().d_scale  * SW &&
+	return (x >= m_groupBox->getXPosition().d_scale * SW && x <= m_groupBox->getXPosition().d_scale * SW + m_groupBox->getWidth().d_scale * SW &&
 		y >= m_groupBox->getYPosition().d_scale * SH && y <= m_groupBox->getYPosition().d_scale * SH + m_groupBox->getHeight().d_scale * SH);
+#else
+	(void)SH;
+	glm::vec2 uiPos = m_uiCamera.convertScreenToWorld(glm::vec2((float)x, (float)y));
+	for (const auto& btn : buildFallbackToolbar()) {
+		if (uiPos.x >= btn.rect.x && uiPos.x <= btn.rect.x + btn.rect.z &&
+		    uiPos.y >= btn.rect.y && uiPos.y <= btn.rect.y + btn.rect.w) {
+			return true;
+		}
+	}
+	return uiPos.x < -SW * 0.5f + 150.0f;
+#endif
 }
 
 void EditorScreen::setPlatformWidgetVisibility(bool visible) {
+#ifdef GAMEENGINE_HAS_CEGUI
 	m_rigidRadioButton->setVisible(visible);
 	m_dynamicRadioButton->setVisible(visible);
 	m_rotationSpinner->setVisible(visible);
 	m_widthSpinner->setVisible(visible);
 	m_heightSpinner->setVisible(visible);
+#else
+	(void)visible;
+#endif
 }
 
 void EditorScreen::setLightWidgetVisibility(bool visible) {
+#ifdef GAMEENGINE_HAS_CEGUI
 	m_aSlider->setVisible(visible);
 	m_sizeSpinner->setVisible(visible);
+#else
+	(void)visible;
+#endif
 }
 
+#ifdef GAMEENGINE_HAS_CEGUI
 bool EditorScreen::onExitClicked(const CEGUI::EventArgs& e) {
 	m_currentState = GameEngine::ScreenState::EXIT_APPLICATION;
 	return true;
@@ -995,14 +1192,13 @@ bool EditorScreen::onSaveMouseClick(const CEGUI::EventArgs& e) {
 	std::vector<GameEngine::DirEntry> entries;
 	GameEngine::IOManager::getDirectoryEntries("Levels", entries);
 
-
 	// Add all files to list box
-	for (auto& e : entries) {
+	for (auto& entry : entries) {
 		// Don't add directories
-		if (!e.isDirectory) {
+		if (!entry.isDirectory) {
 			// Remove "Levels/" substring
-			e.path.erase(0, std::string("Levels/").size());
-			m_saveListBoxItems.push_back(new CEGUI::ListboxTextItem(e.path));
+			entry.path.erase(0, std::string("Levels/").size());
+			m_saveListBoxItems.push_back(new CEGUI::ListboxTextItem(entry.path));
 			m_saveWindowCombobox->addItem(m_saveListBoxItems.back());
 		}
 	}
@@ -1029,14 +1225,13 @@ bool EditorScreen::onLoadMouseClick(const CEGUI::EventArgs& e) {
 	std::vector<GameEngine::DirEntry> entries;
 	GameEngine::IOManager::getDirectoryEntries("Levels", entries);
 
-
 	// Add all files to list box
-	for (auto& e : entries) {
+	for (auto& entry : entries) {
 		// Don't add directories
-		if (!e.isDirectory) {
+		if (!entry.isDirectory) {
 			// Remove "Levels/" substring
-			e.path.erase(0, std::string("Levels/").size());
-			m_loadListBoxItems.push_back(new CEGUI::ListboxTextItem(e.path));
+			entry.path.erase(0, std::string("Levels/").size());
+			m_loadListBoxItems.push_back(new CEGUI::ListboxTextItem(entry.path));
 			m_loadWindowCombobox->addItem(m_loadListBoxItems.back());
 		}
 	}
@@ -1098,9 +1293,13 @@ bool EditorScreen::onSave(const CEGUI::EventArgs& e) {
 	// Make sure levels dir exists again, for good measure.
 	GameEngine::IOManager::makeDirectory("Levels");
 
-	// Save in text mode
-	std::string text = "Levels/" + std::string(m_saveWindowCombobox->getText().c_str());
-	if (LevelReaderWriter::saveAsText(text, m_player, m_boxes, m_lights)) {
+	std::string path = "Levels/" + std::string(m_saveWindowCombobox->getText().c_str());
+	bool saved = endsWithBin(path)
+		? LevelReaderWriter::saveAsBinary(path, m_player, m_boxes, m_lights)
+		: LevelReaderWriter::saveAsText(path, m_player, m_boxes, m_lights);
+
+	if (saved) {
+		LevelReaderWriter::setCurrentLevelPath(path);
 		m_saveWindow->disable();
 		m_saveWindow->setAlpha(0.0f);
 		puts("File successfully saved.");
@@ -1123,12 +1322,171 @@ bool EditorScreen::onLoad(const CEGUI::EventArgs& e) {
 
 	clearLevel();
 
-	if (LevelReaderWriter::loadAsText(path, m_world.get(), m_player, m_boxes, m_lights)) {
+	bool loaded = endsWithBin(path)
+		? LevelReaderWriter::loadAsBinary(path, m_world.get(), m_player, m_boxes, m_lights)
+		: LevelReaderWriter::loadAsText(path, m_world.get(), m_player, m_boxes, m_lights);
+
+	if (loaded) {
 		m_hasPlayer = true;
+		LevelReaderWriter::setCurrentLevelPath(path);
 	}
-	// TODO: Binary file loading/saving
 
 	m_loadWindow->disable();
 	m_loadWindow->setAlpha(0.0f);
 	return true;
 }
+#else
+std::vector<EditorScreen::FallbackButton> EditorScreen::buildFallbackToolbar() const {
+	const float sw = static_cast<float>(m_window->GetScreenWidth());
+	const float sh = static_cast<float>(m_window->GetScreenHeight());
+	const float x = -sw * 0.5f + 10.0f;
+	const float w = 130.0f;
+	const float h = 28.0f;
+	const float step = 34.0f;
+	float y = sh * 0.5f - 40.0f;
+
+	std::vector<FallbackButton> buttons;
+	auto addBtn = [&](ToolbarAction action, const std::string& label) {
+		buttons.push_back({ action, label, glm::vec4(x, y, w, h) });
+		y -= step;
+	};
+
+	addBtn(ToolbarAction::SELECT_MODE, "Select");
+	addBtn(ToolbarAction::PLACE_MODE, "Place");
+	addBtn(ToolbarAction::OBJECT_PLAYER, "Player");
+	addBtn(ToolbarAction::OBJECT_PLATFORM, "Platform");
+	addBtn(ToolbarAction::OBJECT_FINISH, "Finish");
+	addBtn(ToolbarAction::OBJECT_LIGHT, "Light");
+	addBtn(ToolbarAction::TOGGLE_PHYSICS, m_physicsMode == PhysicsMode::DYNAMIC ? "Dyn: ON" : "Dyn: OFF");
+	addBtn(ToolbarAction::TOGGLE_DEBUG, m_debugRender ? "Debug: ON" : "Debug: OFF");
+	addBtn(ToolbarAction::SAVE_LEVEL, "Save");
+	addBtn(ToolbarAction::LOAD_LEVEL, "Load");
+	addBtn(ToolbarAction::BACK, "Back");
+
+	return buttons;
+}
+
+bool EditorScreen::handleFallbackToolbarClick(float screenX, float screenY) {
+	glm::vec2 uiPos = m_uiCamera.convertScreenToWorld(glm::vec2(screenX, screenY));
+	for (const auto& btn : buildFallbackToolbar()) {
+		if (uiPos.x >= btn.rect.x && uiPos.x <= btn.rect.x + btn.rect.z &&
+		    uiPos.y >= btn.rect.y && uiPos.y <= btn.rect.y + btn.rect.w) {
+			switch (btn.action) {
+				case ToolbarAction::SELECT_MODE:
+					m_selectMode = SelectionMode::SELECT;
+					break;
+				case ToolbarAction::PLACE_MODE:
+					m_selectMode = SelectionMode::PLACE;
+					m_selectedBox = NO_BOX;
+					m_selectedLight = NO_LIGHT;
+					break;
+				case ToolbarAction::OBJECT_PLAYER:
+					m_objectMode = ObjectMode::PLAYER;
+					break;
+				case ToolbarAction::OBJECT_PLATFORM:
+					m_objectMode = ObjectMode::PLATFORM;
+					break;
+				case ToolbarAction::OBJECT_FINISH:
+					m_objectMode = ObjectMode::FINISH;
+					break;
+				case ToolbarAction::OBJECT_LIGHT:
+					m_objectMode = ObjectMode::LIGHT;
+					break;
+				case ToolbarAction::TOGGLE_PHYSICS:
+					m_physicsMode = (m_physicsMode == PhysicsMode::RIGID) ? PhysicsMode::DYNAMIC : PhysicsMode::RIGID;
+					refreshSelectedBox();
+					break;
+				case ToolbarAction::TOGGLE_DEBUG:
+					m_debugRender = !m_debugRender;
+					break;
+				case ToolbarAction::SAVE_LEVEL: {
+					if (!m_hasPlayer) {
+						m_statusMessage = "Place player first";
+						break;
+					}
+					GameEngine::IOManager::makeDirectory("Levels");
+					const std::string& path = LevelReaderWriter::getCurrentLevelPath();
+					bool ok = endsWithBin(path)
+						? LevelReaderWriter::saveAsBinary(path, m_player, m_boxes, m_lights)
+						: LevelReaderWriter::saveAsText(path, m_player, m_boxes, m_lights);
+					m_statusMessage = ok ? ("Saved " + path) : "Save failed";
+					break;
+				}
+				case ToolbarAction::LOAD_LEVEL: {
+					const std::string path = LevelReaderWriter::getCurrentLevelPath();
+					clearLevel();
+					bool ok = endsWithBin(path)
+						? LevelReaderWriter::loadAsBinary(path, m_world.get(), m_player, m_boxes, m_lights)
+						: LevelReaderWriter::loadAsText(path, m_world.get(), m_player, m_boxes, m_lights);
+					if (ok) {
+						m_hasPlayer = true;
+						m_statusMessage = "Loaded " + path;
+					} else {
+						m_statusMessage = "Load failed";
+					}
+					break;
+				}
+				case ToolbarAction::BACK:
+					m_currentState = GameEngine::ScreenState::CHANGE_PREVIOUS;
+					break;
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+void EditorScreen::drawFallbackToolbar() {
+	m_textureProgram.Use();
+	GLint textureUniform = m_textureProgram.GetUniformLocation("mySampler");
+	glUniform1i(textureUniform, 0);
+	glActiveTexture(GL_TEXTURE0);
+
+	glm::mat4 projectionMatrix = m_uiCamera.getCameraMatrix();
+	GLint pUniform = m_textureProgram.GetUniformLocation("P");
+	glUniformMatrix4fv(pUniform, 1, GL_FALSE, &projectionMatrix[0][0]);
+
+	m_spriteBatch.begin();
+
+	const float sw = static_cast<float>(m_window->GetScreenWidth());
+	const float sh = static_cast<float>(m_window->GetScreenHeight());
+	m_spriteBatch.draw(glm::vec4(-sw * 0.5f, -sh * 0.5f, 150.0f, sh),
+	                   glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), m_blankTexture.id, 0.0f,
+	                   GameEngine::ColourRGBA8(20, 25, 40, 190));
+
+	for (const auto& btn : buildFallbackToolbar()) {
+		bool active = false;
+		switch (btn.action) {
+			case ToolbarAction::SELECT_MODE: active = (m_selectMode == SelectionMode::SELECT); break;
+			case ToolbarAction::PLACE_MODE: active = (m_selectMode == SelectionMode::PLACE); break;
+			case ToolbarAction::OBJECT_PLAYER: active = (m_objectMode == ObjectMode::PLAYER); break;
+			case ToolbarAction::OBJECT_PLATFORM: active = (m_objectMode == ObjectMode::PLATFORM); break;
+			case ToolbarAction::OBJECT_FINISH: active = (m_objectMode == ObjectMode::FINISH); break;
+			case ToolbarAction::OBJECT_LIGHT: active = (m_objectMode == ObjectMode::LIGHT); break;
+			case ToolbarAction::TOGGLE_PHYSICS: active = (m_physicsMode == PhysicsMode::DYNAMIC); break;
+			case ToolbarAction::TOGGLE_DEBUG: active = m_debugRender; break;
+			default: break;
+		}
+
+		GameEngine::ColourRGBA8 bg = active
+			? GameEngine::ColourRGBA8(70, 140, 220, 230)
+			: GameEngine::ColourRGBA8(45, 55, 80, 210);
+		m_spriteBatch.draw(btn.rect, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), m_blankTexture.id, 0.05f, bg);
+		m_spriteFont.draw(m_spriteBatch, btn.label.c_str(),
+		                  glm::vec2(btn.rect.x + btn.rect.z * 0.5f, btn.rect.y + 4.0f),
+		                  glm::vec2(0.55f), 0.1f, GameEngine::ColourRGBA8(255, 255, 255, 255),
+		                  GameEngine::Justification::MIDDLE);
+	}
+
+	if (!m_statusMessage.empty()) {
+		m_spriteFont.draw(m_spriteBatch, m_statusMessage.c_str(),
+		                  glm::vec2(-sw * 0.5f + 165.0f, -sh * 0.5f + 12.0f),
+		                  glm::vec2(0.55f), 0.1f, GameEngine::ColourRGBA8(220, 240, 255, 255),
+		                  GameEngine::Justification::LEFT);
+	}
+
+	m_spriteBatch.end();
+	m_spriteBatch.renderBatch();
+	m_textureProgram.UnUse();
+}
+#endif

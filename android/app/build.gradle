@@ -1,0 +1,184 @@
+plugins {
+    id 'com.android.application'
+}
+
+def resolveDepPath = { String propName, String jniSubdir ->
+    if (project.hasProperty(propName) && project.property(propName)) {
+        return file(project.property(propName).toString())
+    }
+    def envVal = System.getenv(propName)
+    if (envVal) {
+        return file(envVal)
+    }
+    def localJni = file("jni/${jniSubdir}")
+    if (localJni.exists()) {
+        return localJni
+    }
+    return null
+}
+
+def sdl2Dir = resolveDepPath("SDL2_SOURCE_DIR", "SDL")
+def sdl2TtfDir = resolveDepPath("SDL2_TTF_SOURCE_DIR", "SDL_ttf")
+def sdl2MixerDir = resolveDepPath("SDL2_MIXER_SOURCE_DIR", "SDL_mixer")
+def glmDir = resolveDepPath("GLM_INCLUDE_DIR", "glm")
+def box2dDir = resolveDepPath("BOX2D_SOURCE_DIR", "box2d")
+
+def commonCmakeArgs = ["-DANDROID_STL=c++_shared"]
+if (sdl2Dir != null && sdl2Dir.exists()) {
+    commonCmakeArgs.add("-DSDL2_SOURCE_DIR=${sdl2Dir.absolutePath}")
+}
+if (sdl2TtfDir != null && sdl2TtfDir.exists()) {
+    commonCmakeArgs.add("-DSDL2_TTF_SOURCE_DIR=${sdl2TtfDir.absolutePath}")
+}
+if (sdl2MixerDir != null && sdl2MixerDir.exists()) {
+    commonCmakeArgs.add("-DSDL2_MIXER_SOURCE_DIR=${sdl2MixerDir.absolutePath}")
+}
+if (glmDir != null && glmDir.exists()) {
+    commonCmakeArgs.add("-DGLM_INCLUDE_DIR=${glmDir.absolutePath}")
+}
+if (box2dDir != null && box2dDir.exists()) {
+    commonCmakeArgs.add("-DFETCHCONTENT_SOURCE_DIR_BOX2D_V231=${box2dDir.absolutePath}")
+}
+
+android {
+    namespace 'org.libsdl.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.makinggameswithben.gameengine"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        ndk {
+            abiFilters "arm64-v8a", "armeabi-v7a", "x86_64"
+        }
+
+        externalNativeBuild {
+            cmake {
+                arguments(*commonCmakeArgs)
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            jniDebuggable true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    flavorDimensions "game"
+    productFlavors {
+        tutorialGame {
+            dimension "game"
+            applicationIdSuffix ".tutorial"
+            resValue "string", "app_name", "TutorialGame"
+            externalNativeBuild {
+                cmake {
+                    arguments(*commonCmakeArgs, "-DANDROID_GAME_TARGET=TutorialGame")
+                }
+            }
+        }
+        zombieGame {
+            dimension "game"
+            applicationIdSuffix ".zombie"
+            resValue "string", "app_name", "ZombieGame"
+            externalNativeBuild {
+                cmake {
+                    arguments(*commonCmakeArgs, "-DANDROID_GAME_TARGET=ZombieGame")
+                }
+            }
+        }
+        ballGame {
+            dimension "game"
+            applicationIdSuffix ".ball"
+            resValue "string", "app_name", "BallGame"
+            externalNativeBuild {
+                cmake {
+                    arguments(*commonCmakeArgs, "-DANDROID_GAME_TARGET=BallGame")
+                }
+            }
+        }
+        ninjaPlatformer {
+            dimension "game"
+            applicationIdSuffix ".ninja"
+            resValue "string", "app_name", "NinjaPlatformer"
+            externalNativeBuild {
+                cmake {
+                    arguments(*commonCmakeArgs, "-DANDROID_GAME_TARGET=NinjaPlatformer")
+                }
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "../../CMakeLists.txt"
+            version "3.22.1"
+        }
+    }
+
+    sourceSets {
+        main {
+            if (sdl2Dir != null && new File(sdl2Dir, "android-project/app/src/main/java").exists()) {
+                java.srcDirs += "${sdl2Dir.absolutePath}/android-project/app/src/main/java"
+            }
+        }
+        tutorialGame {
+            assets.srcDirs = ["${buildDir}/generated/gameAssets/tutorialGame"]
+        }
+        zombieGame {
+            assets.srcDirs = ["${buildDir}/generated/gameAssets/zombieGame"]
+        }
+        ballGame {
+            assets.srcDirs = ["${buildDir}/generated/gameAssets/ballGame"]
+        }
+        ninjaPlatformer {
+            assets.srcDirs = ["${buildDir}/generated/gameAssets/ninjaPlatformer"]
+        }
+    }
+}
+
+def gameAssetConfigs = [
+    tutorialGame   : [dir: "../../GameEngine/TutorialGame", folders: ["Shaders", "Textures"]],
+    zombieGame     : [dir: "../../GameEngine/ZombieGame", folders: ["Shaders", "Textures", "Audio", "Fonts", "Levels"]],
+    ballGame       : [dir: "../../GameEngine/BallGame", folders: ["Shaders", "Textures", "Fonts"]],
+    ninjaPlatformer: [dir: "../../GameEngine/NinjaPlatformer", folders: ["Shaders", "Assets", "Fonts", "Levels"]]
+]
+
+gameAssetConfigs.each { flavorName, cfg ->
+    def capName = flavorName.capitalize()
+    def outDir = file("${buildDir}/generated/gameAssets/${flavorName}")
+    tasks.register("copy${capName}Assets", Copy) {
+        def srcBase = file(cfg.dir)
+        cfg.folders.each { folder ->
+            def srcFolder = new File(srcBase, folder)
+            if (srcFolder.exists()) {
+                from(srcFolder) {
+                    into folder
+                }
+            }
+        }
+        into outDir
+    }
+}
+
+android.applicationVariants.configureEach { variant ->
+    def flavorName = variant.flavorName
+    if (gameAssetConfigs.containsKey(flavorName)) {
+        def copyTask = tasks.named("copy${flavorName.capitalize()}Assets")
+        variant.mergeAssetsProvider.configure {
+            dependsOn(copyTask)
+        }
+    }
+}

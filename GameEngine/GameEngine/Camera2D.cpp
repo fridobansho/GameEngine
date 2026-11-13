@@ -15,6 +15,7 @@ namespace GameEngine
 		m_screenWidth = screenWidth;
 		m_screenHeight = screenHeight;
 		m_orthoMatrix = glm::ortho(0.0f, (float)m_screenWidth, 0.0f, (float)m_screenHeight);
+		m_needsMatrixUpdate = true;
 	}
 
 	void Camera2D::Update()

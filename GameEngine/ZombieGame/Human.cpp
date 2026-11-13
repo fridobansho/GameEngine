@@ -38,8 +38,8 @@ void Human::init(float speed, glm::vec2 position)
 }
 
 void Human::update(const std::vector<std::string>& levelData,
-	std::vector<Human*>& humans,
-	std::vector<Zombie*>& zombies,
+	std::vector<std::unique_ptr<Human>>& humans,
+	std::vector<std::unique_ptr<Zombie>>& zombies,
 	float deltaTime)
 {
 	static std::mt19937 randomEngine((unsigned int)time(nullptr));

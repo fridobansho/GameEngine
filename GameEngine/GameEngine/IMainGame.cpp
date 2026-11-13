@@ -68,6 +68,25 @@ namespace GameEngine {
 			case SDL_MOUSEBUTTONUP:
 				inputManager.releaseKey(evnt.button.button);
 				break;
+			case SDL_WINDOWEVENT:
+				if (evnt.window.event == SDL_WINDOWEVENT_RESIZED ||
+					evnt.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+					m_window.OnResize(evnt.window.data1, evnt.window.data2);
+				}
+				break;
+			case SDL_FINGERDOWN:
+				inputManager.onTouchDown(evnt.tfinger.fingerId, evnt.tfinger.x, evnt.tfinger.y,
+										 (float)m_window.GetScreenWidth(), (float)m_window.GetScreenHeight());
+				break;
+			case SDL_FINGERUP:
+				inputManager.onTouchUp(evnt.tfinger.fingerId, evnt.tfinger.x, evnt.tfinger.y,
+									   (float)m_window.GetScreenWidth(), (float)m_window.GetScreenHeight());
+				break;
+			case SDL_FINGERMOTION:
+				inputManager.onTouchMotion(evnt.tfinger.fingerId, evnt.tfinger.x, evnt.tfinger.y,
+										   evnt.tfinger.dx, evnt.tfinger.dy,
+										   (float)m_window.GetScreenWidth(), (float)m_window.GetScreenHeight());
+				break;
 		}
 	}
 

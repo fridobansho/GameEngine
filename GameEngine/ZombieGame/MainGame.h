@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <GameEngine/Window.h>
 #include <GameEngine/GLSLProgram.h>
 #include <GameEngine/Camera2D.h>
@@ -9,6 +11,7 @@
 #include <GameEngine/AudioEngine.h>
 #include <GameEngine/ParticleEngine2D.h>
 #include <GameEngine/ParticleBatch2D.h>
+#include <GameEngine/VirtualControls.h>
 
 #include "Level.h"
 #include "Player.h"
@@ -18,6 +21,8 @@
 enum class GameState
 {
 	PLAY,
+	WON,
+	LOST,
 	EXIT
 };
 
@@ -34,7 +39,11 @@ private:
     /// Initializes the core systems
     void initSystems();
 
+	void initBloodParticles();
+
 	void initLevel();
+
+	void restartLevel();
 
     /// Initializes the shaders
     void initShaders();
@@ -71,9 +80,9 @@ private:
 	GameEngine::Camera2D m_hudCamera;
 	GameEngine::SpriteBatch m_agentSpriteBatch;
 	GameEngine::SpriteBatch m_hudSpriteBatch;
-	std::vector<Level*> m_levels;
+	std::vector<std::unique_ptr<Level>> m_levels;
 	GameEngine::ParticleEngine2D m_particleEngine;
-	GameEngine::ParticleBatch2D* m_bloodParticleBatch;
+	std::unique_ptr<GameEngine::ParticleBatch2D> m_bloodParticleBatch;
 
 	int m_screenWidth;
 	int m_screenHeight;
@@ -84,8 +93,8 @@ private:
 
 	int m_currentLevel;
 
-	std::vector<Human*> m_humans;
-	std::vector<Zombie*> m_zombies;
+	std::vector<std::unique_ptr<Human>> m_humans;
+	std::vector<std::unique_ptr<Zombie>> m_zombies;
 	std::vector<Bullet> m_bullets;
 
 	Player* m_player;
@@ -93,7 +102,8 @@ private:
 	int m_numHumansKilled;
 	int m_numZombiesKilled;
 
-	GameEngine::SpriteFont* m_spriteFont;
+	std::unique_ptr<GameEngine::SpriteFont> m_spriteFont;
+	GameEngine::VirtualControls m_virtualControls;
 
 	GameEngine::AudioEngine m_audioEngine;
 };

@@ -1,20 +1,21 @@
 #include "Level.h"
-#include <fstream>
 #include <iostream>
+#include <sstream>
 
 #include <GameEngine/GameEngineErrors.h>
+#include <GameEngine/IOManager.h>
 #include <GameEngine/ResourceManager.h>
 #include <GameEngine/Vertex.h>
 
 Level::Level(const string & fileName)
 {
-	ifstream file;
-	file.open(fileName);
-
-	if (file.fail())
+	std::string content;
+	if (!GameEngine::IOManager::ReadFileToBuffer(fileName, content))
 	{
 		GameEngine::FatalError("Failed to open " + fileName);
 	}
+
+	std::istringstream file(content);
 
 	string tmp;
 	file >> tmp >> m_numHumans;
@@ -23,7 +24,14 @@ Level::Level(const string & fileName)
 
 	while (getline(file, tmp))
 	{
-		m_levelData.push_back(tmp);
+		if (!tmp.empty() && tmp.back() == '\r')
+		{
+			tmp.pop_back();
+		}
+		if (!tmp.empty())
+		{
+			m_levelData.push_back(tmp);
+		}
 	}
 
 	m_spriteBatch.init();

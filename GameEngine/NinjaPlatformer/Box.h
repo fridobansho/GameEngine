@@ -19,12 +19,15 @@ public:
 	          bool fixedRotation,
 	          bool isDynamic,
 	          float angle = 0.0f,
-	          glm::vec4 uvRect = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+	          glm::vec4 uvRect = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f),
+	          bool isGoal = false);
 	void destroy(b2World* world);
 
 	void draw(GameEngine::SpriteBatch& spriteBatch);
 
 	bool isDynamic() const { return m_body->GetType() == b2_dynamicBody; }
+	bool isGoal() const { return m_isGoal; }
+	void setIsGoal(bool isGoal);
 
 	// Test if a point is inside the box
 	bool testPoint(float x, float y) const { return m_fixture->TestPoint(b2Vec2(x, y)); }
@@ -40,6 +43,7 @@ public:
 	const GameEngine::GLTexture&   getTexture()       const { return m_texture; }
 	const bool&                    getFixedRotation() const { return m_fixedRotation; }
 	const bool&                    getIsDynamic()     const { return m_isDynamic; }
+	const bool&                    getIsGoal()        const { return m_isGoal; }
 private:
 	glm::vec4 m_uvRect;
 	b2Body* m_body = nullptr;
@@ -47,6 +51,7 @@ private:
 	glm::vec2 m_dimensions;
 	GameEngine::ColourRGBA8 m_colour;
 	GameEngine::GLTexture m_texture;
-	bool m_fixedRotation;
-	bool m_isDynamic;
+	bool m_fixedRotation = false;
+	bool m_isDynamic = false;
+	bool m_isGoal = false;
 };

@@ -31,9 +31,9 @@ void Player::init(float speed, glm::vec2 position, GameEngine::InputManager* inp
 	m_textureID = GameEngine::ResourceManager::GetTexture("Textures/player.png").id;
 }
 
-void Player::AddGun(Gun * gun)
+void Player::AddGun(std::unique_ptr<Gun> gun)
 {
-	m_guns.push_back(gun);
+	m_guns.push_back(std::move(gun));
 
 	if (m_currentGunIndex == -1)
 	{
@@ -42,8 +42,8 @@ void Player::AddGun(Gun * gun)
 }
 
 void Player::update(const std::vector<std::string>& levelData,
-	std::vector<Human*>& humans,
-	std::vector<Zombie*>& zombies,
+	std::vector<std::unique_ptr<Human>>& humans,
+	std::vector<std::unique_ptr<Zombie>>& zombies,
 	float deltaTime)
 {
 	if (m_inputManager->isKeyDown(SDLK_w))
@@ -80,7 +80,11 @@ void Player::update(const std::vector<std::string>& levelData,
 	mouseCoords = m_camera->convertScreenToWorld(mouseCoords);
 
 	glm::vec2 centerPosition = m_position + glm::vec2(AGENT_RADIUS);
-	m_direction = glm::normalize(mouseCoords - centerPosition);
+	glm::vec2 aimVec = mouseCoords - centerPosition;
+	if (glm::length(aimVec) > 0.0001f)
+	{
+		m_direction = glm::normalize(aimVec);
+	}
 
 	if(m_currentGunIndex != -1)
 	{

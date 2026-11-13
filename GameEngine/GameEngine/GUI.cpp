@@ -1,9 +1,9 @@
-#include <GL/glew.h> // Include BEFORE GUI.h
-
 #include "GUI.h"
 
-#include <iostream>
+#ifdef GAMEENGINE_HAS_CEGUI
 
+#include <GL/glew.h> // Include GL headers when CEGUI OpenGL3Renderer is active
+#include <iostream>
 #include <SDL_timer.h>
 
 CEGUI::OpenGL3Renderer* GameEngine::GUI::m_renderer = nullptr;
@@ -244,7 +244,15 @@ void GameEngine::GUI::setWidgetDestRect(CEGUI::Window* widget, const glm::vec4& 
 	widget->setSize(CEGUI::USize(CEGUI::UDim(destRectPerc.z, destRectPix.z), CEGUI::UDim(destRectPerc.w, destRectPix.w)));
 }
 
+void GameEngine::GUI::onWindowResize(int width, int height) {
+	if (width > 0 && height > 0 && CEGUI::System::getSingletonPtr() != nullptr) {
+		CEGUI::System::getSingleton().notifyDisplaySizeChanged(CEGUI::Sizef((float)width, (float)height));
+	}
+}
+
 void GameEngine::GUI::setFont(const std::string& fontFile) {
 	CEGUI::FontManager::getSingleton().createFromFile(fontFile + ".font");
 	m_context->setDefaultFont(fontFile);
 }
+
+#endif

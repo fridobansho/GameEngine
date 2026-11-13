@@ -16,13 +16,15 @@ void Box::init(b2World* world,
                bool fixedRotation,
                bool isDynamic,
                float angle, /* = 0.0f */
-               glm::vec4 uvRect /*= glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)*/) {
+               glm::vec4 uvRect, /*= glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)*/
+               bool isGoal /* = false */) {
 	m_dimensions = dimensions;
 	m_colour = colour;
 	m_texture = texture;
 	m_uvRect = uvRect;
 	m_fixedRotation = fixedRotation;
 	m_isDynamic = isDynamic;
+	m_isGoal = isGoal;
 
 	// Make the body
 	b2BodyDef bodyDef;
@@ -43,11 +45,23 @@ void Box::init(b2World* world,
 	fixtureDef.shape = &boxShape;
 	fixtureDef.density = 1.0f;
 	fixtureDef.friction = 0.3f;
+	fixtureDef.isSensor = isGoal;
 	m_fixture = m_body->CreateFixture(&fixtureDef);
 }
 
+void Box::setIsGoal(bool isGoal) {
+	m_isGoal = isGoal;
+	if (m_fixture) {
+		m_fixture->SetSensor(isGoal);
+	}
+}
+
 void Box::destroy(b2World* world) {
-	world->DestroyBody(m_body);
+	if (m_body) {
+		world->DestroyBody(m_body);
+		m_body = nullptr;
+		m_fixture = nullptr;
+	}
 }
 
 void Box::draw(GameEngine::SpriteBatch& spriteBatch) {

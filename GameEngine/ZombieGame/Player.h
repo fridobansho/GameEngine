@@ -1,6 +1,7 @@
 #pragma once
 #include "Human.h"
 
+#include <memory>
 #include <GameEngine/InputManager.h>
 #include <GameEngine/Camera2D.h>
 
@@ -16,16 +17,16 @@ public:
 
 	void init(float speed, glm::vec2 position, GameEngine::InputManager* inputManager, GameEngine::Camera2D* camera, std::vector<Bullet>* bullets);
 
-	void AddGun(Gun* gun);
+	void AddGun(std::unique_ptr<Gun> gun);
 
 	void update(const std::vector<std::string>& levelData,
-		std::vector<Human*>& humans,
-		std::vector<Zombie*>& zombies,
+		std::vector<std::unique_ptr<Human>>& humans,
+		std::vector<std::unique_ptr<Zombie>>& zombies,
 		float deltaTime) override;
 private:
 	GameEngine::InputManager* m_inputManager;
 
-	std::vector<Gun*> m_guns;
+	std::vector<std::unique_ptr<Gun>> m_guns;
 	int m_currentGunIndex = -1;
 
 	GameEngine::Camera2D* m_camera;

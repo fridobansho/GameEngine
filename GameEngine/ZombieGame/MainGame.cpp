@@ -28,6 +28,7 @@ MainGame::MainGame() :
 	m_screenHeight(768),
 	m_gameState(GameState::PLAY),
 	m_fps(0),
+	m_currentLevel(0),
 	m_player(nullptr),
 	m_numHumansKilled(0),
 	m_numZombiesKilled(0)
@@ -37,17 +38,10 @@ MainGame::MainGame() :
 
 MainGame::~MainGame()
 {
-	for (auto& l : m_levels)
+	m_virtualControls.dispose();
+	if (m_spriteFont)
 	{
-		delete l;
-	}
-	for (auto& h : m_humans)
-	{
-		delete h;
-	}
-	for (auto& z : m_zombies)
-	{
-		delete z;
+		m_spriteFont->dispose();
 	}
 }
 
@@ -69,6 +63,8 @@ void MainGame::initSystems() {
 	m_audioEngine.init();
 
 	m_window.Create("Zombie Game", m_screenWidth, m_screenHeight, 0U);
+	m_screenWidth = m_window.GetScreenWidth();
+	m_screenHeight = m_window.GetScreenHeight();
 
 	glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 
@@ -77,32 +73,40 @@ void MainGame::initSystems() {
 	m_agentSpriteBatch.init();
 	m_hudSpriteBatch.init();
 
-	m_spriteFont = new GameEngine::SpriteFont("Fonts/chintzy.ttf", 64);
+	m_spriteFont = std::make_unique<GameEngine::SpriteFont>("Fonts/chintzy.ttf", 64);
 
 	m_camera.Init(m_screenWidth, m_screenHeight);
 	m_hudCamera.Init(m_screenWidth, m_screenHeight);
 	m_hudCamera.SetPosition(glm::vec2(m_screenWidth / 2.0f, m_screenHeight / 2.0f));
 
-	m_bloodParticleBatch = new GameEngine::ParticleBatch2D();
+	initBloodParticles();
+
+	m_virtualControls.init(GameEngine::VirtualControlLayout::TWIN_STICK);
+}
+
+void MainGame::initBloodParticles()
+{
+	m_particleEngine.clear();
+	m_bloodParticleBatch = std::make_unique<GameEngine::ParticleBatch2D>();
 	m_bloodParticleBatch->init(1000, 0.05f,
 		GameEngine::ResourceManager::GetTexture("Textures/particle.png"),
 		[](GameEngine::Particle2D& particle, float deltaTime) {
 		particle.position += particle.velocity * deltaTime;
 		particle.colour.a = (GLubyte)(particle.life * 255.0f);
 	});
-	m_particleEngine.addParticleBatch(m_bloodParticleBatch);
-
+	m_particleEngine.addParticleBatch(m_bloodParticleBatch.get());
 }
 
 void MainGame::initLevel()
 {
-	m_levels.push_back(new Level("Levels/level1.txt"));
+	m_levels.push_back(std::make_unique<Level>("Levels/level1.txt"));
 	m_currentLevel = 0;
 
-	m_player = new Player();
+	auto player = std::make_unique<Player>();
+	m_player = player.get();
 	m_player->init(PLAYER_SPEED, m_levels[m_currentLevel]->getStartPlayerPos(), &m_inputManager, &m_camera, &m_bullets);
 
-	m_humans.push_back(m_player);
+	m_humans.push_back(std::move(player));
 
 	std::mt19937 randomEngine;
 	randomEngine.seed((unsigned int)time(nullptr));
@@ -111,23 +115,44 @@ void MainGame::initLevel()
 
 	for (int i = 0; i < m_levels[m_currentLevel]->getNumHumans(); i++)
 	{
-		m_humans.push_back(new Human);
+		auto human = std::make_unique<Human>();
 		glm::vec2 pos(randomX(randomEngine) * TILE_WIDTH, randomY(randomEngine) * TILE_WIDTH);
-		m_humans.back()->init(HUMAN_SPEED, pos);
+		human->init(HUMAN_SPEED, pos);
+		m_humans.push_back(std::move(human));
 	}
 
 	const std::vector<glm::vec2>& zombiePositions = m_levels[m_currentLevel]->getZombiePositions();
 
 	for (size_t i = 0; i < zombiePositions.size(); i++)
 	{
-		m_zombies.push_back(new Zombie);
-		m_zombies.back()->init(ZOMBIE_SPEED, zombiePositions[i]);
+		auto zombie = std::make_unique<Zombie>();
+		zombie->init(ZOMBIE_SPEED, zombiePositions[i]);
+		m_zombies.push_back(std::move(zombie));
 	}
 
 	const float BULLET_SPEED = 20.0f;
-	m_player->AddGun(new Gun("Magnum", 10, 1, 0.125f, 30, BULLET_SPEED, m_audioEngine.loadSoundEffect("Audio/Sounds/shots/pistol.wav")));
-	m_player->AddGun(new Gun("Shotgun", 30, 12, 0.3f, 4, BULLET_SPEED, m_audioEngine.loadSoundEffect("Audio/Sounds/shots/shotgun.wav")));
-	m_player->AddGun(new Gun("MP5", 2, 1, 0.3f, 20, BULLET_SPEED, m_audioEngine.loadSoundEffect("Audio/Sounds/shots/cg1.wav")));
+	m_player->AddGun(std::make_unique<Gun>("Magnum", 10, 1, 0.125f, 30, BULLET_SPEED, m_audioEngine.loadSoundEffect("Audio/Sounds/shots/pistol.wav")));
+	m_player->AddGun(std::make_unique<Gun>("Shotgun", 30, 12, 0.3f, 4, BULLET_SPEED, m_audioEngine.loadSoundEffect("Audio/Sounds/shots/shotgun.wav")));
+	m_player->AddGun(std::make_unique<Gun>("MP5", 2, 1, 0.3f, 20, BULLET_SPEED, m_audioEngine.loadSoundEffect("Audio/Sounds/shots/cg1.wav")));
+}
+
+void MainGame::restartLevel()
+{
+	m_bullets.clear();
+	m_zombies.clear();
+	m_humans.clear();
+	m_player = nullptr;
+	m_levels.clear();
+	m_numHumansKilled = 0;
+	m_numZombiesKilled = 0;
+
+	initBloodParticles();
+	initLevel();
+	m_gameState = GameState::PLAY;
+	if (m_player != nullptr)
+	{
+		m_camera.SetPosition(m_player->getPosition());
+	}
 }
 
 void MainGame::initShaders()
@@ -155,7 +180,7 @@ void MainGame::gameLoop()
 
 	Uint32 previousTicks = SDL_GetTicks();
 
-	while (m_gameState == GameState::PLAY)
+	while (m_gameState != GameState::EXIT)
 	{
 		fpsLimiter.begin();
 
@@ -165,27 +190,37 @@ void MainGame::gameLoop()
 
 		float totalDeltaTime = frameTime / DESIRED_FRAMETIME;
 
-		checkVictory();
-
 		m_inputManager.update();
 
 		processInput();
 
-		int i = 0;
-		while (totalDeltaTime > 0.0f && i < MAX_PHYSICS_STEPS)
+		if (m_gameState == GameState::PLAY)
 		{
-			float deltaTime = std::min(totalDeltaTime, MAX_DELTA_TIME);
-			updateAgents(deltaTime);
+			checkVictory();
 
-			updateBullets(deltaTime);
+			int i = 0;
+			while (totalDeltaTime > 0.0f && i < MAX_PHYSICS_STEPS && m_gameState == GameState::PLAY)
+			{
+				float deltaTime = std::min(totalDeltaTime, MAX_DELTA_TIME);
+				updateAgents(deltaTime);
 
-			m_particleEngine.update(deltaTime);
+				if (m_gameState == GameState::PLAY)
+				{
+					updateBullets(deltaTime);
+					checkVictory();
+				}
 
-			totalDeltaTime -= deltaTime;
-			i++;
+				m_particleEngine.update(deltaTime);
+
+				totalDeltaTime -= deltaTime;
+				i++;
+			}
+
+			if (m_player != nullptr)
+			{
+				m_camera.SetPosition(m_player->getPosition());
+			}
 		}
-
-		m_camera.SetPosition(m_player->getPosition());
 
 		m_camera.Update();
 		m_hudCamera.Update();
@@ -212,23 +247,28 @@ void MainGame::updateAgents(float deltaTime)
 	{
 		for (size_t j = i + 1; j < m_zombies.size(); j++)
 		{
-			m_zombies[i]->collideWithAgent(m_zombies[j]);
+			m_zombies[i]->collideWithAgent(m_zombies[j].get());
 		}
-		for (size_t j =1; j < m_humans.size(); j++)
+		for (size_t j = 1; j < m_humans.size();)
 		{
-			if (m_zombies[i]->collideWithAgent(m_humans[j]))
+			if (m_zombies[i]->collideWithAgent(m_humans[j].get()))
 			{
-				m_zombies.push_back(new Zombie);
-				m_zombies.back()->init(ZOMBIE_SPEED, m_humans[j]->getPosition());
+				auto zombie = std::make_unique<Zombie>();
+				zombie->init(ZOMBIE_SPEED, m_humans[j]->getPosition());
+				m_zombies.push_back(std::move(zombie));
 
-				delete m_humans[j];
-				m_humans[j] = m_humans.back();
+				m_humans[j] = std::move(m_humans.back());
 				m_humans.pop_back();
 			}
+			else
+			{
+				j++;
+			}
 		}
-		if (m_zombies[i]->collideWithAgent(m_player))
+		if (m_player != nullptr && m_zombies[i]->collideWithAgent(m_player))
 		{
-			GameEngine::FatalError("You lose");
+			m_gameState = GameState::LOST;
+			return;
 		}
 	}
 
@@ -236,7 +276,7 @@ void MainGame::updateAgents(float deltaTime)
 	{
 		for (size_t j = i + 1; j < m_humans.size(); j++)
 		{
-			m_humans[i]->collideWithAgent(m_humans[j]);
+			m_humans[i]->collideWithAgent(m_humans[j].get());
 		}
 	}
 }
@@ -254,21 +294,18 @@ void MainGame::updateBullets(float deltaTime)
 			i++;
 	}
 
-	bool wasBulletRemoved;
-
-	for (size_t i = 0; i < m_bullets.size();i++)
+	for (size_t i = 0; i < m_bullets.size();)
 	{
-		wasBulletRemoved = false;
+		bool wasBulletRemoved = false;
 		for (size_t j = 0; j < m_zombies.size();)
 		{
-			if (m_bullets[i].collideWithAgent(m_zombies[j]))
+			if (m_bullets[i].collideWithAgent(m_zombies[j].get()))
 			{
 				addBlood(m_bullets[i].getPosition(), 5);
 
 				if (m_zombies[j]->applyDamage(m_bullets[i].getDamage()))
 				{
-					delete m_zombies[j];
-					m_zombies[j] = m_zombies.back();
+					m_zombies[j] = std::move(m_zombies.back());
 					m_zombies.pop_back();
 					m_numZombiesKilled++;
 				}
@@ -278,25 +315,24 @@ void MainGame::updateBullets(float deltaTime)
 				m_bullets[i] = m_bullets.back();
 				m_bullets.pop_back();
 				wasBulletRemoved = true;
-				i--;
 				break;
 			}
 			else
 				j++;
 		}
-		if (wasBulletRemoved == false)
+		if (!wasBulletRemoved)
 		{
 			for (size_t j = 1; j < m_humans.size();)
 			{
-				if (m_bullets[i].collideWithAgent(m_humans[j]))
+				if (m_bullets[i].collideWithAgent(m_humans[j].get()))
 				{
 					addBlood(m_bullets[i].getPosition(), 5);
 
 					if (m_humans[j]->applyDamage(m_bullets[i].getDamage()))
 					{
-						delete m_humans[j];
-						m_humans[j] = m_humans.back();
+						m_humans[j] = std::move(m_humans.back());
 						m_humans.pop_back();
+						m_numHumansKilled++;
 					}
 					else
 						j++;
@@ -304,24 +340,26 @@ void MainGame::updateBullets(float deltaTime)
 					m_bullets[i] = m_bullets.back();
 					m_bullets.pop_back();
 					wasBulletRemoved = true;
-					m_numHumansKilled++;
-					i--;
 					break;
 				}
 				else
 					j++;
 			}
 		}
+		if (!wasBulletRemoved)
+		{
+			i++;
+		}
 	}
 }
 
 void MainGame::checkVictory()
 {
-	if (m_zombies.empty())
+	if (m_zombies.empty() && m_gameState == GameState::PLAY)
 	{
-		std::printf("***You win! ***\n You killed %d humans and %d zombies. There are %d/%d civilians remaining",
-			m_numHumansKilled, m_numZombiesKilled, static_cast<int>(m_humans.size() - 1), m_levels[m_currentLevel]->getNumHumans());
-		GameEngine::FatalError("");
+		std::printf("***You win! ***\n You killed %d humans and %d zombies. There are %d/%d civilians remaining\n",
+			m_numHumansKilled, m_numZombiesKilled, std::max(0, static_cast<int>(m_humans.size()) - 1), m_levels[m_currentLevel]->getNumHumans());
+		m_gameState = GameState::WON;
 	}
 }
 
@@ -329,10 +367,23 @@ void MainGame::processInput() {
     SDL_Event evnt;
     //Will keep looping until there are no more events to process
     while (SDL_PollEvent(&evnt)) {
+        if (m_virtualControls.onSDLEvent(evnt, m_inputManager, m_screenWidth, m_screenHeight)) {
+            continue;
+        }
         switch (evnt.type) {
             case SDL_QUIT:
 				m_gameState = GameState::EXIT;
                 // Exit the game here!
+                break;
+            case SDL_WINDOWEVENT:
+                if (evnt.window.event == SDL_WINDOWEVENT_RESIZED || evnt.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+                    m_window.OnResize(evnt.window.data1, evnt.window.data2);
+                    m_screenWidth = m_window.GetScreenWidth();
+                    m_screenHeight = m_window.GetScreenHeight();
+                    m_camera.Resize(m_screenWidth, m_screenHeight);
+                    m_hudCamera.Resize(m_screenWidth, m_screenHeight);
+                    m_hudCamera.SetPosition(glm::vec2(m_screenWidth / 2.0f, m_screenHeight / 2.0f));
+                }
                 break;
             case SDL_MOUSEMOTION:
                 m_inputManager.setMouseCoords((float)evnt.motion.x, (float)evnt.motion.y);
@@ -349,13 +400,45 @@ void MainGame::processInput() {
             case SDL_MOUSEBUTTONUP:
                 m_inputManager.releaseKey(evnt.button.button);
                 break;
+            case SDL_FINGERDOWN:
+                if (m_gameState == GameState::WON || m_gameState == GameState::LOST) {
+                    restartLevel();
+                    break;
+                }
+                m_inputManager.onTouchDown(evnt.tfinger.fingerId, evnt.tfinger.x, evnt.tfinger.y,
+                                           (float)m_screenWidth, (float)m_screenHeight);
+                break;
+            case SDL_FINGERUP:
+                m_inputManager.onTouchUp(evnt.tfinger.fingerId, evnt.tfinger.x, evnt.tfinger.y,
+                                         (float)m_screenWidth, (float)m_screenHeight);
+                break;
+            case SDL_FINGERMOTION:
+                m_inputManager.onTouchMotion(evnt.tfinger.fingerId, evnt.tfinger.x, evnt.tfinger.y,
+                                             evnt.tfinger.dx, evnt.tfinger.dy,
+                                             (float)m_screenWidth, (float)m_screenHeight);
+                break;
         }
+    }
+
+    m_virtualControls.update(m_inputManager, m_screenWidth, m_screenHeight);
+
+    if (m_inputManager.isKeyPressed(SDLK_ESCAPE)) {
+        m_gameState = GameState::EXIT;
+    }
+
+    if ((m_gameState == GameState::WON || m_gameState == GameState::LOST) &&
+        m_inputManager.isKeyPressed(SDLK_r)) {
+        restartLevel();
     }
 }
 
 void MainGame::drawGame() {
     // Set the base depth to 1.0
+#ifdef __ANDROID__
+    glClearDepthf(1.0f);
+#else
     glClearDepth(1.0);
+#endif
     // Clear the color and depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -425,6 +508,36 @@ void MainGame::drawHud()
 
 	m_spriteFont->draw(m_hudSpriteBatch, buffer, glm::vec2(0, 36),
 		glm::vec2(0.5), 0.0f, GameEngine::ColourRGBA8(255, 255, 255, 255));
+
+	if (m_gameState == GameState::WON || m_gameState == GameState::LOST)
+	{
+		auto drawCenteredShadowText = [&](const char* text, float y, float scale, GameEngine::ColourRGBA8 colour) {
+			m_spriteFont->draw(m_hudSpriteBatch, text, glm::vec2(m_screenWidth / 2.0f + 2.0f, y - 2.0f),
+				glm::vec2(scale), 0.0f, GameEngine::ColourRGBA8(0, 0, 0, 220), GameEngine::Justification::MIDDLE);
+			m_spriteFont->draw(m_hudSpriteBatch, text, glm::vec2(m_screenWidth / 2.0f, y),
+				glm::vec2(scale), 0.0f, colour, GameEngine::Justification::MIDDLE);
+		};
+
+		const float centerY = m_screenHeight / 2.0f;
+		if (m_gameState == GameState::WON)
+		{
+			drawCenteredShadowText("YOU WIN!", centerY + 70.0f, 1.0f, GameEngine::ColourRGBA8(50, 255, 50, 255));
+		}
+		else
+		{
+			drawCenteredShadowText("YOU LOSE!", centerY + 70.0f, 1.0f, GameEngine::ColourRGBA8(255, 60, 60, 255));
+		}
+
+		const int civiliansRemaining = std::max(0, static_cast<int>(m_humans.size()) - 1);
+		const int totalCivilians = m_levels.empty() ? 0 : m_levels[m_currentLevel]->getNumHumans();
+		snprintf(buffer, sizeof(buffer), "Humans Killed: %d   Zombies Killed: %d   Civilians Remaining: %d/%d",
+			m_numHumansKilled, m_numZombiesKilled, civiliansRemaining, totalCivilians);
+		drawCenteredShadowText(buffer, centerY + 10.0f, 0.45f, GameEngine::ColourRGBA8(255, 255, 255, 255));
+
+		drawCenteredShadowText("Press R to Restart or ESC to Quit", centerY - 40.0f, 0.5f, GameEngine::ColourRGBA8(255, 230, 120, 255));
+	}
+
+	m_virtualControls.draw(m_hudSpriteBatch, m_screenWidth, m_screenHeight, m_spriteFont.get());
 
 	m_hudSpriteBatch.end();
 

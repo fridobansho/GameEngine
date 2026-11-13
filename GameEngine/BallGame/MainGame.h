@@ -7,16 +7,12 @@
 #include <GameEngine/GLSLProgram.h>
 #include <GameEngine/Timing.h>
 #include <GameEngine/SoA/SpriteFont.h>
+#include <GameEngine/VirtualControls.h>
 #include <memory>
 
 #include "BallController.h"
 #include "BallRenderer.h"
 #include "Grid.h"
-
-// TODO:
-// Visualize momentum with colour
-// Visualize velocity with colour
-// Visualize position with colour
 
 enum class GameState { RUNNING, EXIT };
 
@@ -51,8 +47,10 @@ private:
     GameEngine::SpriteBatch m_spriteBatch; ///< Renders all the balls
     std::unique_ptr<GameEngine::SpriteFont> m_spriteFont; ///< For font rendering
     GameEngine::Camera2D m_camera; ///< Renders the scene
+    GameEngine::Camera2D m_hudCamera; ///< Renders the HUD and virtual controls
     GameEngine::InputManager m_inputManager; ///< Handles input
-    GameEngine::GLSLProgram m_textureProgram; ///< Shader for textures]
+    GameEngine::GLSLProgram m_textureProgram; ///< Shader for textures
+    GameEngine::VirtualControls m_virtualControls;
 
     GameEngine::FPSLimiter m_fpsLimiter; ///< Limits and calculates fps
     float m_fps = 0.0f;

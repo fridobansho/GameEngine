@@ -71,10 +71,15 @@ SpriteBatch::SpriteBatch() : m_vbo(0), m_vao(0)
 
 SpriteBatch::~SpriteBatch()
 {
+	dispose();
 }
 
 void GameEngine::SpriteBatch::init()
 {
+	if (m_vao != 0 || m_vbo != 0)
+	{
+		dispose();
+	}
 	createVertexArray();
 }
 
@@ -82,12 +87,22 @@ void GameEngine::SpriteBatch::dispose()
 {
 	if (m_vao != 0)
 	{
-		glDeleteVertexArrays(1, &m_vao);
+#ifndef __ANDROID__
+		if (glDeleteVertexArrays != nullptr)
+#endif
+		{
+			glDeleteVertexArrays(1, &m_vao);
+		}
 		m_vao = 0;
 	}
 	if (m_vbo != 0)
 	{
-		glDeleteBuffers(1, &m_vbo);
+#ifndef __ANDROID__
+		if (glDeleteBuffers != nullptr)
+#endif
+		{
+			glDeleteBuffers(1, &m_vbo);
+		}
 		m_vbo = 0;
 	}
 }

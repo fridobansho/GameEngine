@@ -1,7 +1,11 @@
 #pragma once
 
 #include <string>
+#ifdef __ANDROID__
+#include <GLES3/gl3.h>
+#else
 #include <GL/glew.h>
+#endif
 
 namespace GameEngine {
 	class GLSLProgram
@@ -18,6 +22,8 @@ namespace GameEngine {
 		void Use();
 		void UnUse();
 		void Dispose();
+
+		static std::string PreprocessShaderSource(const std::string& source, bool targetGLES);
 
 	private:
 		void CompileShader(const char* source, const std::string& name, GLuint id);
