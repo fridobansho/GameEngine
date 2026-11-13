@@ -9,6 +9,7 @@
 // Ball renderer interface
 class BallRenderer {
 public:
+    virtual ~BallRenderer() = default;
     virtual void renderBalls(GameEngine::SpriteBatch& spriteBatch, const std::vector<Ball>& balls,
                              const glm::mat4& projectionMatrix);
 protected:

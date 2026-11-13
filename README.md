@@ -25,9 +25,9 @@ chmod +x setup-and-build-bazzite.sh
 ./setup-and-build-bazzite.sh
 ```
 
-You can also run the script standalone before cloning to let it clone `linux-port`, create the container, and build in one command:
+You can also run the script standalone before cloning to let it clone `master`, create the container, and build in one command:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/fridobansho/GameEngine/linux-port/setup-and-build-bazzite.sh | bash
+curl -fsSL https://raw.githubusercontent.com/fridobansho/GameEngine/master/setup-and-build-bazzite.sh | bash
 ```
 
 ### Option B: Manual Steps (`ubuntu-toolbox`)

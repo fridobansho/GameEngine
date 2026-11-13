@@ -21,7 +21,7 @@ CONTAINER_NAME="${CONTAINER_NAME:-gamedev-ubuntu}"
 # (required for NinjaPlatformer's level editor GUI).
 CONTAINER_IMAGE="${CONTAINER_IMAGE:-quay.io/toolbx/ubuntu-toolbox:22.04}"
 REPO_URL="${REPO_URL:-https://github.com/fridobansho/GameEngine.git}"
-REPO_BRANCH="${REPO_BRANCH:-linux-port}"
+REPO_BRANCH="${REPO_BRANCH:-master}"
 BUILD_TYPE="${BUILD_TYPE:-Release}"
 
 # -----------------------------------------------------------------------------
